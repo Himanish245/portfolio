@@ -6,6 +6,11 @@ import * as THREE from 'three';
 import { globalScrollProgress } from '@/hooks/useScrollProgress';
 import { useMousePosition } from '@/hooks/useMousePosition';
 
+function smoothstep(min: number, max: number, value: number) {
+  const x = Math.max(0, Math.min(1, (value - min) / (max - min)));
+  return x * x * (3 - 2 * x);
+}
+
 // High-resolution glowing terminal display texture for the monitor
 function useTerminalTexture() {
   return useMemo(() => {
@@ -16,15 +21,12 @@ function useTerminalTexture() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
 
-    // Dark cyberpunk background
     ctx.fillStyle = '#050711';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Title bar
     ctx.fillStyle = '#0c1122';
     ctx.fillRect(0, 0, canvas.width, 44);
 
-    // Window controls
     ctx.fillStyle = '#ff5f56';
     ctx.beginPath();
     ctx.arc(26, 22, 6, 0, Math.PI * 2);
@@ -40,12 +42,11 @@ function useTerminalTexture() {
 
     ctx.fillStyle = '#64748b';
     ctx.font = '16px monospace';
-    ctx.fillText('himanish@foreground-companion: ~ /telemetry', 100, 28);
+    ctx.fillText('himanish@hardware-companion: ~ /telemetry', 100, 28);
 
-    // Main terminal output
     ctx.fillStyle = '#38bdf8';
     ctx.font = 'bold 24px monospace';
-    ctx.fillText('> HIMANISH 3D WORKSTATION // FOREGROUND DOCK', 36, 92);
+    ctx.fillText('> HIMANISH 3D WORKSTATION // LIVE RUNTIME', 36, 92);
 
     ctx.fillStyle = '#cbd5e1';
     ctx.font = '19px monospace';
@@ -53,9 +54,8 @@ function useTerminalTexture() {
     ctx.fillText('[SECURITY] Network Telemetry ............ [GUARDED]', 36, 172);
     ctx.fillText('[NEURAL]   Applied AI Pipeline .......... [ENGAGED]', 36, 210);
     ctx.fillText('[CREATIVE] 3D WebGL / Kinematics ........ [ACTIVE]', 36, 248);
-    ctx.fillText('[STATUS]   POPPED OUT & DOCKED IN FOREGROUND', 36, 286);
+    ctx.fillText('[STATUS]   CONSISTENT TRAJECTORY DOCK ... [SYNCHRONIZED]', 36, 286);
 
-    // Diagnostic bar
     ctx.fillStyle = '#1e293b';
     ctx.fillRect(36, 330, 952, 24);
     ctx.fillStyle = '#4a9eff';
@@ -63,11 +63,11 @@ function useTerminalTexture() {
 
     ctx.fillStyle = '#94a3b8';
     ctx.font = '16px monospace';
-    ctx.fillText('COOLANT LOOP: 21.2°C • RTX CLOCK: 2700 MHz • KINEMATICS: 120 FPS', 36, 395);
+    ctx.fillText('COOLANT: 21.2°C • RTX CLOCK: 2700 MHz • KINEMATICS: DETERMINISTIC', 36, 395);
 
     ctx.fillStyle = '#22c55e';
     ctx.font = 'bold 22px monospace';
-    ctx.fillText('FOREGROUND COMPANION ACTIVE • ENJOY BROWSING _', 36, 445);
+    ctx.fillText('STABLE TRAJECTORY ENGAGED • ENJOY EXPLORING _', 36, 445);
 
     const texture = new THREE.CanvasTexture(canvas);
     texture.needsUpdate = true;
@@ -91,134 +91,101 @@ export default function PCModel({ isMobile }: PCModelProps) {
 
   const mouse = useMousePosition();
   const terminalTexture = useTerminalTexture();
-
-  // Smooth lerp states
-  const smoothPop = useRef(0);
-  const smoothSettle = useRef(0);
+  const smoothP = useRef(0);
 
   useFrame((state) => {
-    const popTarget = globalScrollProgress.popProgress;
-    const settleTarget = globalScrollProgress.settleProgress;
-
-    // Smooth responsive interpolation
-    smoothPop.current = THREE.MathUtils.lerp(smoothPop.current, popTarget, 0.12);
-    smoothSettle.current = THREE.MathUtils.lerp(smoothSettle.current, settleTarget, 0.08);
-
-    const pop = smoothPop.current;
-    const settle = smoothSettle.current;
+    const target = globalScrollProgress.target;
+    // Single smooth, consistent lerp tracker
+    smoothP.current = THREE.MathUtils.lerp(smoothP.current, target, 0.1);
+    const p = smoothP.current;
     const time = state.clock.getElapsedTime();
 
     if (!rootGroupRef.current) return;
 
-    // ──────────────── 1. DRAMATIC POP-OUT & SETTLE KINEMATICS ────────────────
-    // Position X:
-    // Starts at right in Hero (0.45) -> Swoops center during pop-out (0.0) -> SETTLES to bottom-right (1.48)
-    const heroX = 0.45;
-    const popX = 0.0;
-    const settleX = isMobile ? 0.0 : 1.48;
-    const currentX = settle > 0.01
-      ? THREE.MathUtils.lerp(popX, settleX, settle)
-      : THREE.MathUtils.lerp(heroX, popX, pop);
+    // ──────────────── 1. UNIFIED, CONSISTENT TRAJECTORY ────────────────
+    const PEAK = 0.38; // exact inflection point where it peaks out forward
+    const t1 = smoothstep(0, PEAK, p);
+    const t2 = smoothstep(PEAK, 1.0, p);
 
-    // Position Y:
-    // Starts at -0.15 -> Surges UP during pop-out (+0.35) -> SETTLES down low (-0.98)
-    const heroY = -0.15;
-    const popY = 0.35;
-    const settleY = isMobile ? -1.25 : -0.98;
-    const baseY = settle > 0.01
-      ? THREE.MathUtils.lerp(popY, settleY, settle)
-      : THREE.MathUtils.lerp(heroY, popY, pop);
+    // Position X: 0.5 (hero right) -> 0.0 (center pop) -> 1.45 (docked bottom-right)
+    const posX = p <= PEAK
+      ? THREE.MathUtils.lerp(0.5, 0.0, t1)
+      : THREE.MathUtils.lerp(0.0, isMobile ? 0.0 : 1.45, t2);
 
-    // Gentle floating idle breathing when settled
-    const idleFloat = settle > 0.4 ? Math.sin(time * 1.8) * 0.04 : 0;
-    const currentY = baseY + idleFloat;
+    // Position Y: -0.15 (hero) -> +0.35 (pop peak) -> -1.0 (docked low)
+    const baseY = p <= PEAK
+      ? THREE.MathUtils.lerp(-0.15, 0.35, t1)
+      : THREE.MathUtils.lerp(0.35, isMobile ? -1.25 : -1.0, t2);
 
-    // Position Z (Depth):
-    // Starts at 0 -> POPS OUT FORWARD toward the user (+2.2!) -> SETTLES into dock (-0.3)
-    const heroZ = 0.0;
-    const popZ = 2.2;
-    const settleZ = -0.3;
-    const currentZ = settle > 0.01
-      ? THREE.MathUtils.lerp(popZ, settleZ, settle)
-      : THREE.MathUtils.lerp(heroZ, popZ, pop);
+    // Smooth idle breathing float when settled, zero when at top
+    const idleFloat = Math.sin(time * 1.8) * 0.035 * t2;
+    const posY = baseY + idleFloat;
 
-    rootGroupRef.current.position.x = THREE.MathUtils.lerp(rootGroupRef.current.position.x, currentX, 0.12);
-    rootGroupRef.current.position.y = THREE.MathUtils.lerp(rootGroupRef.current.position.y, currentY, 0.12);
-    rootGroupRef.current.position.z = THREE.MathUtils.lerp(rootGroupRef.current.position.z, currentZ, 0.12);
+    // Position Z: 0.0 (hero) -> +2.0 (surges forward towards user) -> -0.4 (settled back)
+    const posZ = p <= PEAK
+      ? THREE.MathUtils.lerp(0.0, 2.0, t1)
+      : THREE.MathUtils.lerp(2.0, -0.4, t2);
 
-    // Scale:
-    // Starts at 1.05 -> POPS UP to 1.25 -> SETTLES down to 0.58 (desktop) / 0.42 (mobile)
-    const heroScale = isMobile ? 0.75 : 1.05;
-    const popScale = isMobile ? 0.95 : 1.25;
-    const settleScale = isMobile ? 0.42 : 0.58;
-    const currentScale = settle > 0.01
-      ? THREE.MathUtils.lerp(popScale, settleScale, settle)
-      : THREE.MathUtils.lerp(heroScale, popScale, pop);
+    rootGroupRef.current.position.set(posX, posY, posZ);
 
-    rootGroupRef.current.scale.setScalar(currentScale);
+    // Scale: 1.05 (hero) -> 1.22 (expanded) -> 0.55 (settled compact dock)
+    const baseScale = isMobile ? 0.75 : 1.05;
+    const peakScale = isMobile ? 0.92 : 1.22;
+    const dockScale = isMobile ? 0.42 : 0.55;
+    const scale = p <= PEAK
+      ? THREE.MathUtils.lerp(baseScale, peakScale, t1)
+      : THREE.MathUtils.lerp(peakScale, dockScale, t2);
 
-    // ──────────────── 2. ROTATION & ORIENTATION ────────────────
-    // Spins 360° during pop-out, then settles into a clean angled showcase perspective (0.55 rad)
-    const popRotY = -0.35 + pop * Math.PI * 2.0;
-    const settleRotY = 0.55 + Math.sin(time * 0.8) * 0.03;
-    const currentRotY = settle > 0.01
-      ? THREE.MathUtils.lerp(popRotY, settleRotY, settle)
-      : popRotY;
+    rootGroupRef.current.scale.setScalar(scale);
 
-    // Banking tilt angle
-    const popRotX = 0.12 + Math.sin(pop * Math.PI) * 0.25;
-    const settleRotX = 0.15;
-    const currentRotX = settle > 0.01
-      ? THREE.MathUtils.lerp(popRotX, settleRotX, settle)
-      : popRotX;
+    // Rotation Y: STRICTLY MONOTONIC TURN FROM -0.35 TO 1.85 (Zero reversals!)
+    const rotY = THREE.MathUtils.lerp(-0.35, 1.85, p);
+    const rotX = THREE.MathUtils.lerp(0.12, 0.15, p) + Math.sin(p * Math.PI) * 0.1;
 
-    // Mouse parallax
-    const mouseInfluence = settle > 0.4 ? 0.06 : Math.max(1 - pop * 1.5, 0.05);
-    const mouseRotY = isMobile ? 0 : mouse.x * 0.2 * mouseInfluence;
-    const mouseRotX = isMobile ? 0 : mouse.y * 0.15 * mouseInfluence;
+    // Subtle gentle mouse parallax
+    const mouseInfluence = isMobile ? 0 : 0.08 * (1 - p * 0.5);
+    rootGroupRef.current.rotation.y = rotY + mouse.x * mouseInfluence;
+    rootGroupRef.current.rotation.x = rotX + mouse.y * mouseInfluence;
 
-    rootGroupRef.current.rotation.y = THREE.MathUtils.lerp(rootGroupRef.current.rotation.y, currentRotY + mouseRotY, 0.1);
-    rootGroupRef.current.rotation.x = THREE.MathUtils.lerp(rootGroupRef.current.rotation.x, currentRotX + mouseRotX, 0.1);
+    // ──────────────── 2. CONSISTENT PART DISASSEMBLY ────────────────
+    // Explosion factor: 0.0 at top -> 1.0 at pop peak -> 0.0 at dock
+    const explosion = p <= PEAK ? t1 : (1 - t2);
 
-    // ──────────────── 3. DRAMATIC EXPLODED PART DISASSEMBLY ────────────────
-    // Explodes vigorously during pop-out, then pulls into a compact semi-exploded dock
-    const explosionFactor = Math.max(pop - settle * 0.65, 0);
-
-    // Tempered glass panel flies out wide
+    // Tempered glass panel
     if (glassPanelRef.current) {
-      const glassDist = explosionFactor * (isMobile ? 1.4 : 2.8);
+      const glassDist = explosion * (isMobile ? 1.4 : 2.6);
       glassPanelRef.current.position.x = 0.52 + glassDist;
       glassPanelRef.current.position.z = glassDist * 0.35;
     }
 
-    // GPU floats forward directly towards the screen
+    // GPU floats forward
     if (gpuRef.current) {
-      const gpuDist = explosionFactor * (isMobile ? 1.2 : 2.2);
-      gpuRef.current.position.z = gpuDist * 1.2;
+      const gpuDist = explosion * (isMobile ? 1.1 : 2.0);
+      gpuRef.current.position.z = gpuDist * 1.1;
       gpuRef.current.position.y = -0.22 - gpuDist * 0.45;
       gpuRef.current.position.x = -0.05 + gpuDist * 0.3;
-      gpuRef.current.rotation.z = explosionFactor * 0.3;
+      gpuRef.current.rotation.z = explosion * 0.25;
     }
 
-    // CPU waterblock and liquid cooling tubes elevate
+    // CPU waterblock and tubes
     if (coolerRef.current) {
-      const coolerDist = explosionFactor * (isMobile ? 1.0 : 1.9);
-      coolerRef.current.position.z = coolerDist * 1.0;
-      coolerRef.current.position.y = 0.35 + coolerDist * 0.55;
+      const coolerDist = explosion * (isMobile ? 0.9 : 1.7);
+      coolerRef.current.position.z = coolerDist * 0.9;
+      coolerRef.current.position.y = 0.35 + coolerDist * 0.5;
     }
 
-    // RAM sticks shoot up
+    // RAM modules
     if (ramRef.current) {
-      const ramDist = explosionFactor * (isMobile ? 0.9 : 1.7);
-      ramRef.current.position.y = 0.45 + ramDist * 1.0;
-      ramRef.current.position.z = ramDist * 0.45;
+      const ramDist = explosion * (isMobile ? 0.8 : 1.5);
+      ramRef.current.position.y = 0.45 + ramDist * 0.9;
+      ramRef.current.position.z = ramDist * 0.4;
     }
 
-    // Monitor separates for layered depth
+    // Monitor separates
     if (monitorRef.current) {
-      const monitorDist = explosionFactor * 0.8;
+      const monitorDist = explosion * 0.7;
       monitorRef.current.position.z = -0.3 - monitorDist;
-      monitorRef.current.position.x = -0.8 - monitorDist * 0.6;
+      monitorRef.current.position.x = -0.8 - monitorDist * 0.5;
     }
   });
 
@@ -226,7 +193,6 @@ export default function PCModel({ isMobile }: PCModelProps) {
     <group ref={rootGroupRef}>
       {/* ────────────────── 1. PC TOWER CHASSIS ────────────────── */}
       <group ref={towerRef} position={[1.1, 0, 0]}>
-        {/* Main Obsidian Chassis Frame */}
         <mesh position={[0, 0, 0]} castShadow receiveShadow>
           <boxGeometry args={[1.0, 1.9, 1.8]} />
           <meshPhysicalMaterial
@@ -238,7 +204,6 @@ export default function PCModel({ isMobile }: PCModelProps) {
           />
         </mesh>
 
-        {/* Front Cyber Grille with vertical LED blade */}
         <mesh position={[0, 0, 0.91]}>
           <boxGeometry args={[0.96, 1.86, 0.04]} />
           <meshStandardMaterial color="#08080e" roughness={0.4} metalness={0.9} />
@@ -248,19 +213,16 @@ export default function PCModel({ isMobile }: PCModelProps) {
           <meshBasicMaterial color="#38bdf8" />
         </mesh>
 
-        {/* Internal Chamber Cutout */}
         <mesh position={[0.05, 0.1, 0]}>
           <boxGeometry args={[0.85, 1.45, 1.55]} />
           <meshStandardMaterial color="#07070a" roughness={0.8} />
         </mesh>
 
-        {/* PSU Shroud (Bottom Chamber) */}
         <mesh position={[0.05, -0.65, 0]}>
           <boxGeometry args={[0.88, 0.45, 1.58]} />
           <meshStandardMaterial color="#101018" roughness={0.4} metalness={0.7} />
         </mesh>
 
-        {/* Tempered Glass Side Panel (Pops out on scroll) */}
         <mesh ref={glassPanelRef} position={[0.52, 0, 0]}>
           <boxGeometry args={[0.03, 1.85, 1.75]} />
           <meshPhysicalMaterial
@@ -274,7 +236,7 @@ export default function PCModel({ isMobile }: PCModelProps) {
           />
         </mesh>
 
-        {/* ────────── MOTHERBOARD & INTERNAL ARCHITECTURE ────────── */}
+        {/* ────────── MOTHERBOARD ────────── */}
         <mesh position={[-0.32, 0.1, 0]}>
           <boxGeometry args={[0.04, 1.25, 1.35]} />
           <meshStandardMaterial color="#161922" roughness={0.6} metalness={0.4} />
@@ -284,7 +246,7 @@ export default function PCModel({ isMobile }: PCModelProps) {
           <meshBasicMaterial color="#38bdf8" wireframe={true} transparent opacity={0.12} />
         </mesh>
 
-        {/* ────────── EXPLODING GPU (GRAPHICS CARD) ────────── */}
+        {/* ────────── GPU ────────── */}
         <group ref={gpuRef} position={[-0.05, -0.22, 0]}>
           <mesh position={[0, 0, 0]}>
             <boxGeometry args={[0.42, 0.28, 1.2]} />
@@ -307,7 +269,7 @@ export default function PCModel({ isMobile }: PCModelProps) {
           ))}
         </group>
 
-        {/* ────────── EXPLODING LIQUID COOLER & TUBES ────────── */}
+        {/* ────────── LIQUID COOLER ────────── */}
         <group ref={coolerRef} position={[-0.15, 0.35, 0]}>
           <mesh rotation={[0, 0, Math.PI / 2]}>
             <cylinderGeometry args={[0.18, 0.18, 0.08, 24]} />
@@ -343,7 +305,7 @@ export default function PCModel({ isMobile }: PCModelProps) {
           </mesh>
         </group>
 
-        {/* ────────── EXPLODING RAM STICKS ────────── */}
+        {/* ────────── RAM STICKS ────────── */}
         <group ref={ramRef} position={[-0.12, 0.45, 0.3]}>
           {[-0.06, -0.02, 0.02, 0.06].map((zPos, idx) => (
             <group key={idx} position={[0, 0, zPos]}>
@@ -360,7 +322,7 @@ export default function PCModel({ isMobile }: PCModelProps) {
         </group>
       </group>
 
-      {/* ────────────────── 2. ULTRAWIDE DISPLAY / MONITOR ────────────────── */}
+      {/* ────────────────── 2. ULTRAWIDE MONITOR ────────────────── */}
       <group ref={monitorRef} position={[-0.8, 0.1, -0.3]}>
         <mesh position={[0, 0, 0]}>
           <boxGeometry args={[2.5, 1.35, 0.06]} />
@@ -384,7 +346,7 @@ export default function PCModel({ isMobile }: PCModelProps) {
         </mesh>
       </group>
 
-      {/* ────────────────── 3. MECHANICAL KEYBOARD & DESK ────────────────── */}
+      {/* ────────────────── 3. MECHANICAL KEYBOARD ────────────────── */}
       <group ref={keyboardRef} position={[-0.7, -1.15, 0.6]}>
         <mesh position={[0, 0, 0]} rotation={[-0.1, 0, 0]}>
           <boxGeometry args={[1.2, 0.06, 0.45]} />
