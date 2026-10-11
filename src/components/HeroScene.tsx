@@ -13,25 +13,29 @@ import PCModel from './PCModel';
 
 function CameraRig({ isMobile }: { isMobile: boolean }) {
   const mouse = useMousePosition();
-  const smoothZ = useRef(4.2);
 
   useFrame((state) => {
-    const p = globalScrollProgress.target;
-    // On scroll, camera pulls back slightly to frame the exploded components, then moves forward
-    const targetZ = 4.2 + (isMobile ? 0.8 : 0) + (p < 0.5 ? p * 0.8 : (1 - p) * 0.4);
-    smoothZ.current = THREE.MathUtils.lerp(smoothZ.current, targetZ, 0.05);
+    const pop = globalScrollProgress.popProgress;
+    const settle = globalScrollProgress.settleProgress;
+
+    // During pop-out, camera zooms in slightly; when settled down, camera frames wider
+    const targetZ = settle > 0.05
+      ? THREE.MathUtils.lerp(3.8, 4.4, settle)
+      : THREE.MathUtils.lerp(4.2, 3.8, pop);
+
+    state.camera.position.z = THREE.MathUtils.lerp(state.camera.position.z, targetZ + (isMobile ? 0.7 : 0), 0.06);
 
     if (!isMobile) {
-      const targetX = mouse.x * 0.45;
-      const targetY = 0.35 + mouse.y * 0.25;
-      state.camera.position.x = THREE.MathUtils.lerp(state.camera.position.x, targetX, 0.035);
-      state.camera.position.y = THREE.MathUtils.lerp(state.camera.position.y, targetY, 0.035);
+      const mouseDamp = settle > 0.5 ? 0.08 : 0.35;
+      const targetX = mouse.x * mouseDamp;
+      const targetY = 0.25 + mouse.y * (mouseDamp * 0.6);
+      state.camera.position.x = THREE.MathUtils.lerp(state.camera.position.x, targetX, 0.04);
+      state.camera.position.y = THREE.MathUtils.lerp(state.camera.position.y, targetY, 0.04);
     } else {
-      state.camera.position.y = THREE.MathUtils.lerp(state.camera.position.y, 0.3, 0.035);
+      state.camera.position.y = THREE.MathUtils.lerp(state.camera.position.y, 0.2, 0.04);
     }
 
-    state.camera.position.z = smoothZ.current;
-    state.camera.lookAt(0, -0.1, 0);
+    state.camera.lookAt(0, -0.05, 0);
   });
 
   return null;
@@ -77,7 +81,7 @@ function CinematicWorkstationLighting() {
         color="#ffffff"
       />
       {/* Minimum ambient illumination */}
-      <ambientLight intensity={0.15} />
+      <ambientLight intensity={0.16} />
     </>
   );
 }
@@ -88,12 +92,12 @@ function Scene({ isMobile }: { isMobile: boolean }) {
       <CameraRig isMobile={isMobile} />
       <CinematicWorkstationLighting />
       
-      {/* Animated 3D Workstation & Exploded Rig */}
+      {/* Animated 3D Workstation: Pops out & Settles down on scroll */}
       <PCModel isMobile={isMobile} />
 
       {/* Floating cyber dust motes around the rig */}
       <Sparkles
-        count={isMobile ? 30 : 65}
+        count={isMobile ? 25 : 60}
         scale={[6, 4, 5]}
         size={isMobile ? 1.4 : 2.0}
         speed={0.25}
@@ -108,7 +112,7 @@ function Scene({ isMobile }: { isMobile: boolean }) {
           <Bloom
             luminanceThreshold={0.7}
             luminanceSmoothing={0.85}
-            intensity={0.45}
+            intensity={0.42}
           />
         </EffectComposer>
       )}
@@ -120,7 +124,7 @@ export default function HeroScene() {
   const { isMobile, pixelRatio } = useMobileDetect();
   const reducedMotion = useReducedMotion();
 
-  // Initialize scroll progress trigger hook
+  // Initialize scroll progress tracking
   useScrollProgress();
 
   if (reducedMotion) {
@@ -130,9 +134,9 @@ export default function HeroScene() {
   }
 
   return (
-    <div className="absolute inset-0 select-none">
+    <div className="w-full h-full select-none">
       <Canvas
-        camera={{ position: [0, 0.4, 4.2], fov: 42 }}
+        camera={{ position: [0, 0.35, 4.2], fov: 42 }}
         dpr={pixelRatio}
         gl={{
           antialias: !isMobile,

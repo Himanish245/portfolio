@@ -40,34 +40,34 @@ function useTerminalTexture() {
 
     ctx.fillStyle = '#64748b';
     ctx.font = '16px monospace';
-    ctx.fillText('himanish@hardware-rig: ~ /telemetry-dashboard', 100, 28);
+    ctx.fillText('himanish@workstation: ~ /telemetry-companion', 100, 28);
 
     // Main terminal output
     ctx.fillStyle = '#38bdf8';
     ctx.font = 'bold 24px monospace';
-    ctx.fillText('> HIMANISH WORKSTATION CORE // LIVE TELEMETRY', 36, 92);
+    ctx.fillText('> HIMANISH CORE WORKSTATION // LIVE RUNTIME', 36, 92);
 
     ctx.fillStyle = '#cbd5e1';
     ctx.font = '19px monospace';
-    ctx.fillText('[CHASSIS] Obsidian Alloy Frame .......... [MOUNTED]', 36, 134);
-    ctx.fillText('[GPU]     RTX Neural Engine (Dual Fan) ... [DISASSEMBLING]', 36, 172);
-    ctx.fillText('[COOLING] Liquid Loop @ 21.8°C ........... [PUMP ENGAGED]', 36, 210);
-    ctx.fillText('[MEMORY]  DDR5 High-Speed Channel ........ [EXPANDED]', 36, 248);
-    ctx.fillText('[SECURITY] Packet Inspection Engine ...... [ARMED]', 36, 286);
+    ctx.fillText('[SYSTEM]   Full-Stack Core Engine ....... [ONLINE]', 36, 134);
+    ctx.fillText('[SECURITY] Network Telemetry ............ [GUARDED]', 36, 172);
+    ctx.fillText('[NEURAL]   Applied AI Pipeline .......... [ENGAGED]', 36, 210);
+    ctx.fillText('[CREATIVE] 3D WebGL / Kinematics ........ [ACTIVE]', 36, 248);
+    ctx.fillText('[STATUS]   DODCKED AS REAL-TIME COMPANION [STABLE]', 36, 286);
 
     // Diagnostic bar
     ctx.fillStyle = '#1e293b';
     ctx.fillRect(36, 330, 952, 24);
     ctx.fillStyle = '#4a9eff';
-    ctx.fillRect(36, 330, 810, 24);
+    ctx.fillRect(36, 330, 840, 24);
 
     ctx.fillStyle = '#94a3b8';
     ctx.font = '16px monospace';
-    ctx.fillText('SCROLL PROGRESS LINKED • REAL-TIME HARDWARE KINEMATICS', 36, 395);
+    ctx.fillText('LIQUID COOLANT: 21.4°C • GPU CLOCK: 2650 MHz • FLOW: OPTIMAL', 36, 395);
 
     ctx.fillStyle = '#22c55e';
     ctx.font = 'bold 22px monospace';
-    ctx.fillText('STATUS: SCROLLING TO EXPLODE 3D ARCHITECTURE _', 36, 445);
+    ctx.fillText('COMPANION SETTLED • READY FOR NAVIGATION _', 36, 445);
 
     const texture = new THREE.CanvasTexture(canvas);
     texture.needsUpdate = true;
@@ -91,105 +91,135 @@ export default function PCModel({ isMobile }: PCModelProps) {
 
   const mouse = useMousePosition();
   const terminalTexture = useTerminalTexture();
-  const smoothProgress = useRef(0);
+
+  // Smooth lerp states
+  const smoothPop = useRef(0);
+  const smoothSettle = useRef(0);
 
   useFrame((state, delta) => {
-    // Smooth responsive lerp of scroll target
-    const target = globalScrollProgress.target;
-    smoothProgress.current = THREE.MathUtils.lerp(smoothProgress.current, target, 0.12);
-    const p = smoothProgress.current;
+    const popTarget = globalScrollProgress.popProgress;
+    const settleTarget = globalScrollProgress.settleProgress;
+
+    // Smooth responsive interpolation
+    smoothPop.current = THREE.MathUtils.lerp(smoothPop.current, popTarget, 0.1);
+    smoothSettle.current = THREE.MathUtils.lerp(smoothSettle.current, settleTarget, 0.08);
+
+    const pop = smoothPop.current;
+    const settle = smoothSettle.current;
+    const time = state.clock.getElapsedTime();
 
     if (!rootGroupRef.current) return;
 
-    // ──────────────── 1. DRAMATIC CAR-LIKE 3D MOVEMENT ────────────────
-    // Horizontal drift across screen (like a car moving into frame and cornering)
-    const targetX = isMobile ? 0 : THREE.MathUtils.lerp(0.5, -0.45, p);
-    // Vertical floating elevation
-    const targetY = THREE.MathUtils.lerp(-0.15, 0.25, p);
-    // Depth zoom (glides forward toward user like a car accelerating forward)
-    const targetZ = THREE.MathUtils.lerp(0, 0.9, p);
+    // ──────────────── 1. POP OUT PHASE -> SETTLE DOWN KINEMATICS ────────────────
+    // Position X: Starts at right (0.45), moves center during pop-out (0.0), then SETTLES to bottom-right (1.4)
+    const heroX = 0.45;
+    const popX = 0.0;
+    const settleX = isMobile ? 0.0 : 1.45;
+    const currentX = settle > 0.01
+      ? THREE.MathUtils.lerp(popX, settleX, settle)
+      : THREE.MathUtils.lerp(heroX, popX, pop);
 
-    rootGroupRef.current.position.x = THREE.MathUtils.lerp(rootGroupRef.current.position.x, targetX, 0.1);
-    rootGroupRef.current.position.y = THREE.MathUtils.lerp(rootGroupRef.current.position.y, targetY, 0.1);
-    rootGroupRef.current.position.z = THREE.MathUtils.lerp(rootGroupRef.current.position.z, targetZ, 0.1);
+    // Position Y: Starts at -0.15, rises up during pop-out (+0.25), then SETTLES down low (-1.05)
+    const heroY = -0.15;
+    const popY = 0.25;
+    const settleY = isMobile ? -1.3 : -1.02;
+    const baseY = settle > 0.01
+      ? THREE.MathUtils.lerp(popY, settleY, settle)
+      : THREE.MathUtils.lerp(heroY, popY, pop);
 
-    // 360-degree dynamic steering rotation (spins and showcases all angles)
-    const targetRotY = -0.35 + p * Math.PI * 2.1;
-    // Banking/tilt angle as if carving a turn
-    const targetRotX = 0.12 + Math.sin(p * Math.PI) * 0.22;
-    const targetRotZ = Math.sin(p * Math.PI) * -0.15;
+    // Gentle floating idle breathing once settled
+    const idleFloat = settle > 0.5 ? Math.sin(time * 1.6) * 0.04 : 0;
+    const currentY = baseY + idleFloat;
 
-    // Subtle mouse parallax when near top
-    const mouseDamp = Math.max(1 - p * 1.5, 0.05);
-    const mouseRotY = isMobile ? 0 : mouse.x * 0.18 * mouseDamp;
-    const mouseRotX = isMobile ? 0 : mouse.y * 0.12 * mouseDamp;
+    // Position Z: Starts at 0, POPS OUT toward camera (+1.6), then SETTLES back into dock (-0.5)
+    const heroZ = 0.0;
+    const popZ = 1.6;
+    const settleZ = -0.5;
+    const currentZ = settle > 0.01
+      ? THREE.MathUtils.lerp(popZ, settleZ, settle)
+      : THREE.MathUtils.lerp(heroZ, popZ, pop);
 
-    rootGroupRef.current.rotation.y = THREE.MathUtils.lerp(
-      rootGroupRef.current.rotation.y,
-      targetRotY + mouseRotY,
-      0.1
-    );
-    rootGroupRef.current.rotation.x = THREE.MathUtils.lerp(
-      rootGroupRef.current.rotation.x,
-      targetRotX + mouseRotX,
-      0.1
-    );
-    rootGroupRef.current.rotation.z = THREE.MathUtils.lerp(
-      rootGroupRef.current.rotation.z,
-      targetRotZ,
-      0.1
-    );
+    rootGroupRef.current.position.x = THREE.MathUtils.lerp(rootGroupRef.current.position.x, currentX, 0.12);
+    rootGroupRef.current.position.y = THREE.MathUtils.lerp(rootGroupRef.current.position.y, currentY, 0.12);
+    rootGroupRef.current.position.z = THREE.MathUtils.lerp(rootGroupRef.current.position.z, currentZ, 0.12);
 
-    // ──────────────── 2. EXPLODED COMPONENT DISASSEMBLY ────────────────
-    // Glass panel flies outward horizontally
+    // Scale: Starts at 1.0, pops up to 1.15, then SETTLES into compact companion size (0.55 / 0.4)
+    const heroScale = isMobile ? 0.72 : 1.05;
+    const popScale = isMobile ? 0.85 : 1.18;
+    const settleScale = isMobile ? 0.42 : 0.56;
+    const currentScale = settle > 0.01
+      ? THREE.MathUtils.lerp(popScale, settleScale, settle)
+      : THREE.MathUtils.lerp(heroScale, popScale, pop);
+
+    rootGroupRef.current.scale.setScalar(currentScale);
+
+    // ──────────────── 2. ROTATION & ORIENTATION ────────────────
+    // Spins 360° during pop-out, then settles into an aesthetic angled isometric showcase (0.5 rad)
+    const popRotY = -0.35 + pop * Math.PI * 1.8;
+    const settleRotY = 0.55 + Math.sin(time * 0.8) * 0.03;
+    const currentRotY = settle > 0.01
+      ? THREE.MathUtils.lerp(popRotY, settleRotY, settle)
+      : popRotY;
+
+    // Tilt angle
+    const popRotX = 0.12 + Math.sin(pop * Math.PI) * 0.22;
+    const settleRotX = 0.15;
+    const currentRotX = settle > 0.01
+      ? THREE.MathUtils.lerp(popRotX, settleRotX, settle)
+      : popRotX;
+
+    // Mouse parallax (subtle when settled)
+    const mouseInfluence = settle > 0.5 ? 0.06 : Math.max(1 - pop * 1.5, 0.05);
+    const mouseRotY = isMobile ? 0 : mouse.x * 0.2 * mouseInfluence;
+    const mouseRotX = isMobile ? 0 : mouse.y * 0.15 * mouseInfluence;
+
+    rootGroupRef.current.rotation.y = THREE.MathUtils.lerp(rootGroupRef.current.rotation.y, currentRotY + mouseRotY, 0.1);
+    rootGroupRef.current.rotation.x = THREE.MathUtils.lerp(rootGroupRef.current.rotation.x, currentRotX + mouseRotX, 0.1);
+
+    // ──────────────── 3. EXPLODED COMPONENT DISASSEMBLY ────────────────
+    // Explodes during pop-out (0 to 1), and gracefully pulls back into a clean semi-exploded settled silhouette
+    const explosionFactor = Math.max(pop - settle * 0.7, 0);
+
+    // Glass panel
     if (glassPanelRef.current) {
-      const glassExplode = p * (isMobile ? 1.0 : 2.2);
-      glassPanelRef.current.position.x = 0.52 + glassExplode;
-      glassPanelRef.current.position.z = glassExplode * 0.35;
-      glassPanelRef.current.rotation.y = p * 0.3;
+      const glassDist = explosionFactor * (isMobile ? 1.0 : 2.2);
+      glassPanelRef.current.position.x = 0.52 + glassDist;
+      glassPanelRef.current.position.z = glassDist * 0.3;
     }
 
-    // GPU pulls out from PCIe socket and floats forward into view
+    // GPU separation
     if (gpuRef.current) {
-      const gpuExplode = p * (isMobile ? 0.9 : 1.9);
-      gpuRef.current.position.z = gpuExplode * 1.1;
-      gpuRef.current.position.y = -0.22 - gpuExplode * 0.45;
-      gpuRef.current.position.x = -0.05 + gpuExplode * 0.25;
-      gpuRef.current.rotation.z = p * 0.25;
-      gpuRef.current.rotation.y = -p * 0.2;
+      const gpuDist = explosionFactor * (isMobile ? 0.9 : 1.8);
+      gpuRef.current.position.z = gpuDist * 1.1;
+      gpuRef.current.position.y = -0.22 - gpuDist * 0.4;
+      gpuRef.current.position.x = -0.05 + gpuDist * 0.25;
+      gpuRef.current.rotation.z = explosionFactor * 0.25;
     }
 
-    // Liquid CPU Cooler waterblock and glowing tubes detach and elevate
+    // Liquid Cooler & tubes
     if (coolerRef.current) {
-      const coolerExplode = p * (isMobile ? 0.8 : 1.6);
-      coolerRef.current.position.z = coolerExplode * 1.0;
-      coolerRef.current.position.y = 0.35 + coolerExplode * 0.45;
-      coolerRef.current.position.x = -0.15 + coolerExplode * 0.2;
+      const coolerDist = explosionFactor * (isMobile ? 0.8 : 1.5);
+      coolerRef.current.position.z = coolerDist * 0.9;
+      coolerRef.current.position.y = 0.35 + coolerDist * 0.45;
     }
 
-    // RAM sticks shoot upwards out of the DIMM slots
+    // RAM modules
     if (ramRef.current) {
-      const ramExplode = p * (isMobile ? 0.7 : 1.4);
-      ramRef.current.position.y = 0.45 + ramExplode * 0.85;
-      ramRef.current.position.z = ramExplode * 0.5;
+      const ramDist = explosionFactor * (isMobile ? 0.7 : 1.3);
+      ramRef.current.position.y = 0.45 + ramDist * 0.8;
+      ramRef.current.position.z = ramDist * 0.4;
     }
 
-    // Monitor pulls backward and angles for depth separation
+    // Monitor
     if (monitorRef.current) {
-      monitorRef.current.position.z = -0.3 - p * 0.8;
-      monitorRef.current.position.x = -0.8 - p * 0.4;
-      monitorRef.current.rotation.y = -p * 0.3;
-    }
-
-    // Keyboard drifts slightly forward and spreads
-    if (keyboardRef.current) {
-      keyboardRef.current.position.z = 0.6 + p * 0.6;
-      keyboardRef.current.position.y = -1.15 - p * 0.2;
+      const monitorDist = explosionFactor * 0.6;
+      monitorRef.current.position.z = -0.3 - monitorDist;
+      monitorRef.current.position.x = -0.8 - monitorDist * 0.5;
     }
   });
 
   return (
-    <group ref={rootGroupRef} scale={isMobile ? 0.72 : 1.05}>
+    <group ref={rootGroupRef}>
       {/* ────────────────── 1. PC TOWER CHASSIS ────────────────── */}
       <group ref={towerRef} position={[1.1, 0, 0]}>
         {/* Main Obsidian Chassis Frame */}
@@ -226,7 +256,7 @@ export default function PCModel({ isMobile }: PCModelProps) {
           <meshStandardMaterial color="#101018" roughness={0.4} metalness={0.7} />
         </mesh>
 
-        {/* Tempered Glass Side Panel (Explodes on scroll along +X) */}
+        {/* Tempered Glass Side Panel (Pops out on scroll) */}
         <mesh ref={glassPanelRef} position={[0.52, 0, 0]}>
           <boxGeometry args={[0.03, 1.85, 1.75]} />
           <meshPhysicalMaterial
