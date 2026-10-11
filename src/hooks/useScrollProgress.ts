@@ -1,52 +1,51 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
+import { useEffect } from 'react';
 
 export interface ScrollProgressRef {
   current: number;
   target: number;
-  velocity: number;
+  rawScroll: number;
+  pageProgress: number;
 }
 
-// Global shared mutable scroll progress to avoid React re-renders in WebGL render loop
+// Global mutable scroll progress for 60/120fps render loop
 export const globalScrollProgress: ScrollProgressRef = {
   current: 0,
   target: 0,
-  velocity: 0,
+  rawScroll: 0,
+  pageProgress: 0,
 };
 
 export function useScrollProgress() {
-  const triggerRef = useRef<ScrollTrigger | null>(null);
-
   useEffect(() => {
-    // Create ScrollTrigger tracking scroll across hero and into work section
-    triggerRef.current = ScrollTrigger.create({
-      start: 0,
-      end: () => window.innerHeight * 2.2, // spans across hero into work section
-      onUpdate: (self) => {
-        globalScrollProgress.target = self.progress;
-        globalScrollProgress.velocity = self.getVelocity() / 1000;
-      },
-    });
+    const updateScroll = () => {
+      const scrollY = window.scrollY || window.pageYOffset || 0;
+      const heroTravelDistance = window.innerHeight * 1.5; // distance over sticky hero
+      const totalDocScroll = Math.max(
+        document.documentElement.scrollHeight - window.innerHeight,
+        1
+      );
 
-    const handleScroll = () => {
-      // Fallback simple calculation
-      const maxScroll = window.innerHeight * 2.2;
-      const progress = Math.min(Math.max(window.scrollY / maxScroll, 0), 1);
-      if (!triggerRef.current) {
-        globalScrollProgress.target = progress;
-      }
+      // Hero sequence progress (0 to 1)
+      const heroProgress = Math.min(Math.max(scrollY / heroTravelDistance, 0), 1);
+      // Entire page progress (0 to 1)
+      const pageProg = Math.min(Math.max(scrollY / totalDocScroll, 0), 1);
+
+      globalScrollProgress.target = heroProgress;
+      globalScrollProgress.rawScroll = scrollY;
+      globalScrollProgress.pageProgress = pageProg;
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    // Immediate initial sync
+    updateScroll();
+
+    window.addEventListener('scroll', updateScroll, { passive: true });
+    window.addEventListener('resize', updateScroll, { passive: true });
 
     return () => {
-      if (triggerRef.current) triggerRef.current.kill();
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('scroll', updateScroll);
+      window.removeEventListener('resize', updateScroll);
     };
   }, []);
 
