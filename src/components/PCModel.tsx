@@ -11,6 +11,40 @@ function smoothstep(min: number, max: number, value: number) {
   return x * x * (3 - 2 * x);
 }
 
+// Glowing RTX 5090 brand badge texture
+function useGPUTexture() {
+  return useMemo(() => {
+    if (typeof document === 'undefined') return null;
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+
+    ctx.fillStyle = '#080a12';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Glowing border line
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(4, 4, canvas.width - 8, canvas.height - 8);
+
+    // GeForce RTX Text
+    ctx.fillStyle = '#f1f5f9';
+    ctx.font = 'bold 36px monospace';
+    ctx.fillText('GEFORCE RTX', 28, 76);
+
+    // 5090 Neon Cyan Badge
+    ctx.fillStyle = '#38bdf8';
+    ctx.font = 'bold 44px monospace';
+    ctx.fillText('5090', 330, 80);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.needsUpdate = true;
+    return texture;
+  }, []);
+}
+
 // High-resolution glowing terminal display texture for the monitor
 function useTerminalTexture() {
   return useMemo(() => {
@@ -21,12 +55,14 @@ function useTerminalTexture() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
 
-    ctx.fillStyle = '#050711';
+    ctx.fillStyle = '#04060d';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.fillStyle = '#0c1122';
+    // Title bar
+    ctx.fillStyle = '#0a0e1c';
     ctx.fillRect(0, 0, canvas.width, 44);
 
+    // Window controls
     ctx.fillStyle = '#ff5f56';
     ctx.beginPath();
     ctx.arc(26, 22, 6, 0, Math.PI * 2);
@@ -42,32 +78,34 @@ function useTerminalTexture() {
 
     ctx.fillStyle = '#64748b';
     ctx.font = '16px monospace';
-    ctx.fillText('himanish@hardware-companion: ~ /telemetry', 100, 28);
+    ctx.fillText('himanish@rig-terminal: ~ /telemetry', 100, 28);
 
+    // Main telemetry
     ctx.fillStyle = '#38bdf8';
     ctx.font = 'bold 24px monospace';
-    ctx.fillText('> HIMANISH 3D WORKSTATION // LIVE RUNTIME', 36, 92);
+    ctx.fillText('> HIMANISH WORKSTATION // RTX 5090 WORKBENCH', 36, 92);
 
     ctx.fillStyle = '#cbd5e1';
     ctx.font = '19px monospace';
-    ctx.fillText('[SYSTEM]   Full-Stack Core Engine ....... [ONLINE]', 36, 134);
-    ctx.fillText('[SECURITY] Network Telemetry ............ [GUARDED]', 36, 172);
-    ctx.fillText('[NEURAL]   Applied AI Pipeline .......... [ENGAGED]', 36, 210);
-    ctx.fillText('[CREATIVE] 3D WebGL / Kinematics ........ [ACTIVE]', 36, 248);
-    ctx.fillText('[STATUS]   DODCKED BELOW TEXT IN HERO ... [OPTIMAL]', 36, 286);
+    ctx.fillText('[GPU]  NVIDIA GEFORCE RTX 5090 (32GB GDDR7) ... [READY]', 36, 134);
+    ctx.fillText('[VRAM] 32GB @ 28 Gbps • 21,760 CUDA CORES ..... [OPTIMAL]', 36, 172);
+    ctx.fillText('[MB]   Z890 HERO DARK • REINFORCED PCIE 5.0 ... [MOUNTED]', 36, 210);
+    ctx.fillText('[AIO]  360mm INFINITY MIRROR LOOP @ 22.4°C .... [PUMP 100%]', 36, 248);
+    ctx.fillText('[RAM]  64GB DDR5-7200 RGB QUAD-CHANNEL ........ [ENGAGED]', 36, 286);
 
+    // Diagnostic bar
     ctx.fillStyle = '#1e293b';
     ctx.fillRect(36, 330, 952, 24);
-    ctx.fillStyle = '#4a9eff';
-    ctx.fillRect(36, 330, 840, 24);
+    ctx.fillStyle = '#38bdf8';
+    ctx.fillRect(36, 330, 880, 24);
 
     ctx.fillStyle = '#94a3b8';
     ctx.font = '16px monospace';
-    ctx.fillText('COOLANT: 21.2°C • RTX CLOCK: 2700 MHz • KINEMATICS: DETERMINISTIC', 36, 395);
+    ctx.fillText('RTX 5090 TEMPERATURE: 34.8°C • RGB COLOR HARMONY: SYNCHRONIZED', 36, 395);
 
     ctx.fillStyle = '#22c55e';
     ctx.font = 'bold 22px monospace';
-    ctx.fillText('STABLE TRAJECTORY ENGAGED • ENJOY EXPLORING _', 36, 445);
+    ctx.fillText('SYSTEM LIVE • SCROLL TO EXPLODE HARDWARE _', 36, 445);
 
     const texture = new THREE.CanvasTexture(canvas);
     texture.needsUpdate = true;
@@ -90,6 +128,7 @@ export default function PCModel({ isMobile }: PCModelProps) {
   const keyboardRef = useRef<THREE.Group>(null);
 
   const mouse = useMousePosition();
+  const gpuTexture = useGPUTexture();
   const terminalTexture = useTerminalTexture();
   const smoothP = useRef(0);
 
@@ -102,20 +141,16 @@ export default function PCModel({ isMobile }: PCModelProps) {
     if (!rootGroupRef.current) return;
 
     // ──────────────── 1. UNIFIED, CONSISTENT TRAJECTORY ────────────────
-    const PEAK = 0.38; // point of maximum forward pop-out & explosion
+    const PEAK = 0.38;
     const t1 = smoothstep(0, PEAK, p);
     const t2 = smoothstep(PEAK, 1.0, p);
 
-    // Position X:
-    // Before scroll: parked on right (0.65) -> Center during pop-out (0.0) -> Settled in dock (1.45)
+    // Position X: 0.65 (hero right) -> 0.0 (center pop) -> 1.45 (docked bottom-right)
     const posX = p <= PEAK
       ? THREE.MathUtils.lerp(0.65, 0.0, t1)
       : THREE.MathUtils.lerp(0.0, isMobile ? 0.0 : 1.45, t2);
 
-    // Position Y:
-    // Before scroll: STAYS BELOW THE TEXT (-0.85)!
-    // During pop-out: surges UP to center (+0.25)
-    // Settle down: glides to bottom dock (-1.0)
+    // Position Y: Stays cleanly below text before scroll (-0.85) -> Pops up (+0.25) -> Docks (-1.0)
     const heroY = isMobile ? -1.1 : -0.85;
     const popY = isMobile ? 0.1 : 0.25;
     const dockY = isMobile ? -1.25 : -1.0;
@@ -124,51 +159,46 @@ export default function PCModel({ isMobile }: PCModelProps) {
       ? THREE.MathUtils.lerp(heroY, popY, t1)
       : THREE.MathUtils.lerp(popY, dockY, t2);
 
-    // Subtle breathing float when settled
     const idleFloat = Math.sin(time * 1.8) * 0.035 * t2;
     const posY = baseY + idleFloat;
 
-    // Position Z:
-    // Before scroll: 0.0 -> Pop-out surges forward (+2.0) -> Settle moves back (-0.4)
+    // Position Z: 0.0 (hero) -> +2.0 (surges forward towards user) -> -0.4 (settled back)
     const posZ = p <= PEAK
       ? THREE.MathUtils.lerp(0.0, 2.0, t1)
       : THREE.MathUtils.lerp(2.0, -0.4, t2);
 
     rootGroupRef.current.position.set(posX, posY, posZ);
 
-    // Scale:
-    // Before scroll: compact (0.85) so it stays cleanly below text -> Pops up (1.2) -> Docks (0.55)
-    const heroScale = isMobile ? 0.62 : 0.88;
+    // Scale
+    const baseScale = isMobile ? 0.62 : 0.88;
     const peakScale = isMobile ? 0.88 : 1.2;
     const dockScale = isMobile ? 0.42 : 0.55;
 
     const scale = p <= PEAK
-      ? THREE.MathUtils.lerp(heroScale, peakScale, t1)
+      ? THREE.MathUtils.lerp(baseScale, peakScale, t1)
       : THREE.MathUtils.lerp(peakScale, dockScale, t2);
 
     rootGroupRef.current.scale.setScalar(scale);
 
-    // Rotation Y: Strictly monotonic forward turn from -0.35 to 1.85 (Zero reversals!)
+    // Rotation Y: Strictly monotonic forward turn from -0.35 to 1.85
     const rotY = THREE.MathUtils.lerp(-0.35, 1.85, p);
     const rotX = THREE.MathUtils.lerp(0.12, 0.15, p) + Math.sin(p * Math.PI) * 0.1;
 
-    // Subtle gentle mouse parallax
     const mouseInfluence = isMobile ? 0 : 0.08 * (1 - p * 0.5);
     rootGroupRef.current.rotation.y = rotY + mouse.x * mouseInfluence;
     rootGroupRef.current.rotation.x = rotX + mouse.y * mouseInfluence;
 
     // ──────────────── 2. PART DISASSEMBLY ────────────────
-    // Explosion factor: 0.0 at top -> 1.0 at pop peak -> 0.0 at dock
     const explosion = p <= PEAK ? t1 : (1 - t2);
 
-    // Tempered glass panel
+    // Glass panel
     if (glassPanelRef.current) {
       const glassDist = explosion * (isMobile ? 1.4 : 2.6);
       glassPanelRef.current.position.x = 0.52 + glassDist;
       glassPanelRef.current.position.z = glassDist * 0.35;
     }
 
-    // GPU floats forward
+    // RTX 5090 GPU floats forward
     if (gpuRef.current) {
       const gpuDist = explosion * (isMobile ? 1.1 : 2.0);
       gpuRef.current.position.z = gpuDist * 1.1;
@@ -177,14 +207,14 @@ export default function PCModel({ isMobile }: PCModelProps) {
       gpuRef.current.rotation.z = explosion * 0.25;
     }
 
-    // CPU waterblock and tubes
+    // AIO CPU Cooler & tubes
     if (coolerRef.current) {
       const coolerDist = explosion * (isMobile ? 0.9 : 1.7);
       coolerRef.current.position.z = coolerDist * 0.9;
       coolerRef.current.position.y = 0.35 + coolerDist * 0.5;
     }
 
-    // RAM modules
+    // RGB RAM modules
     if (ramRef.current) {
       const ramDist = explosion * (isMobile ? 0.8 : 1.5);
       ramRef.current.position.y = 0.45 + ramDist * 0.9;
@@ -203,136 +233,241 @@ export default function PCModel({ isMobile }: PCModelProps) {
     <group ref={rootGroupRef}>
       {/* ────────────────── 1. PC TOWER CHASSIS ────────────────── */}
       <group ref={towerRef} position={[1.1, 0, 0]}>
+        {/* Outer Obsidian Frame */}
         <mesh position={[0, 0, 0]} castShadow receiveShadow>
-          <boxGeometry args={[1.0, 1.9, 1.8]} />
+          <boxGeometry args={[1.05, 1.95, 1.85]} />
           <meshPhysicalMaterial
-            color="#0b0b12"
+            color="#080a10"
             roughness={0.25}
-            metalness={0.85}
-            clearcoat={0.6}
+            metalness={0.9}
+            clearcoat={0.7}
             clearcoatRoughness={0.15}
           />
         </mesh>
 
-        <mesh position={[0, 0, 0.91]}>
-          <boxGeometry args={[0.96, 1.86, 0.04]} />
-          <meshStandardMaterial color="#08080e" roughness={0.4} metalness={0.9} />
+        {/* Front Panel with Cyber Grille & LED Light Blade */}
+        <mesh position={[0, 0, 0.93]}>
+          <boxGeometry args={[0.98, 1.88, 0.04]} />
+          <meshStandardMaterial color="#06080e" roughness={0.4} metalness={0.9} />
         </mesh>
-        <mesh position={[0, 0, 0.94]}>
-          <boxGeometry args={[0.04, 1.6, 0.02]} />
+        <mesh position={[0, 0, 0.96]}>
+          <boxGeometry args={[0.03, 1.65, 0.02]} />
           <meshBasicMaterial color="#38bdf8" />
         </mesh>
 
+        {/* Internal Chamber Cutout */}
         <mesh position={[0.05, 0.1, 0]}>
-          <boxGeometry args={[0.85, 1.45, 1.55]} />
-          <meshStandardMaterial color="#07070a" roughness={0.8} />
+          <boxGeometry args={[0.9, 1.48, 1.6]} />
+          <meshStandardMaterial color="#05060a" roughness={0.8} />
         </mesh>
 
+        {/* PSU Shroud (Bottom Chamber) with Embossed Accent */}
         <mesh position={[0.05, -0.65, 0]}>
-          <boxGeometry args={[0.88, 0.45, 1.58]} />
-          <meshStandardMaterial color="#101018" roughness={0.4} metalness={0.7} />
+          <boxGeometry args={[0.92, 0.46, 1.62]} />
+          <meshStandardMaterial color="#0e111a" roughness={0.35} metalness={0.8} />
+        </mesh>
+        {/* PSU Shroud RGB Ambient Line */}
+        <mesh position={[0.5, -0.42, 0]}>
+          <boxGeometry args={[0.02, 0.02, 1.55]} />
+          <meshBasicMaterial color="#38bdf8" />
         </mesh>
 
+        {/* Ultra-Clear Tempered Glass Side Panel */}
         <mesh ref={glassPanelRef} position={[0.52, 0, 0]}>
-          <boxGeometry args={[0.03, 1.85, 1.75]} />
+          <boxGeometry args={[0.02, 1.88, 1.78]} />
           <meshPhysicalMaterial
-            color="#141c2c"
-            transmission={0.85}
-            opacity={0.55}
+            color="#0f172a"
+            transmission={0.96}
+            opacity={0.3}
             transparent={true}
-            roughness={0.05}
-            metalness={0.2}
-            reflectivity={0.95}
+            roughness={0.03}
+            metalness={0.1}
+            reflectivity={0.98}
           />
         </mesh>
 
-        {/* ────────── MOTHERBOARD ────────── */}
-        <mesh position={[-0.32, 0.1, 0]}>
-          <boxGeometry args={[0.04, 1.25, 1.35]} />
-          <meshStandardMaterial color="#161922" roughness={0.6} metalness={0.4} />
-        </mesh>
-        <mesh position={[-0.29, 0.1, 0]}>
-          <planeGeometry args={[1.3, 1.2]} />
-          <meshBasicMaterial color="#38bdf8" wireframe={true} transparent opacity={0.12} />
+        {/* Internal Case Dynamic RGB Lighting (casts real light on components) */}
+        <pointLight position={[0.1, 0.6, 0.2]} intensity={2.4} color="#38bdf8" distance={2.5} />
+        <pointLight position={[0.1, -0.1, -0.2]} intensity={1.8} color="#a855f7" distance={2.5} />
+
+        {/* ────────── MOTHERBOARD (DETAILED WITH HEATSINKS & PCIE) ────────── */}
+        {/* Motherboard PCB Backplate */}
+        <mesh position={[-0.34, 0.12, 0]}>
+          <boxGeometry args={[0.03, 1.3, 1.4]} />
+          <meshStandardMaterial color="#0b0e14" roughness={0.5} metalness={0.5} />
         </mesh>
 
-        {/* ────────── GPU ────────── */}
+        {/* Motherboard Golden Circuit Trace Overlay */}
+        <mesh position={[-0.32, 0.12, 0]}>
+          <planeGeometry args={[1.35, 1.25]} />
+          <meshBasicMaterial color="#38bdf8" wireframe={true} transparent opacity={0.14} />
+        </mesh>
+
+        {/* VRM Heatsink Top (Machined Aluminum) */}
+        <mesh position={[-0.3, 0.6, 0]}>
+          <boxGeometry args={[0.07, 0.14, 0.7]} />
+          <meshStandardMaterial color="#1a1e2a" roughness={0.2} metalness={0.9} />
+        </mesh>
+
+        {/* VRM Heatsink Left (Flanking CPU) */}
+        <mesh position={[-0.3, 0.35, -0.32]}>
+          <boxGeometry args={[0.07, 0.45, 0.14]} />
+          <meshStandardMaterial color="#1a1e2a" roughness={0.2} metalness={0.9} />
+        </mesh>
+
+        {/* Chipset & M.2 NVMe Armor Shield (with RGB cyber stripe) */}
+        <mesh position={[-0.3, -0.42, 0.25]}>
+          <boxGeometry args={[0.06, 0.25, 0.65]} />
+          <meshStandardMaterial color="#151924" roughness={0.25} metalness={0.85} />
+        </mesh>
+        <mesh position={[-0.26, -0.42, 0.25]}>
+          <boxGeometry args={[0.01, 0.02, 0.55]} />
+          <meshBasicMaterial color="#38bdf8" />
+        </mesh>
+
+        {/* Steel-Reinforced PCIe 5.0 x16 Slot */}
+        <mesh position={[-0.28, -0.1, 0]}>
+          <boxGeometry args={[0.05, 0.04, 1.1]} />
+          <meshStandardMaterial color="#94a3b8" roughness={0.2} metalness={0.95} />
+        </mesh>
+
+        {/* ────────── FLAGSHIP NVIDIA GEFORCE RTX 5090 GPU ────────── */}
         <group ref={gpuRef} position={[-0.05, -0.22, 0]}>
+          {/* Main Massive 3.5-Slot Shroud */}
           <mesh position={[0, 0, 0]}>
-            <boxGeometry args={[0.42, 0.28, 1.2]} />
+            <boxGeometry args={[0.44, 0.3, 1.35]} />
             <meshPhysicalMaterial
-              color="#0e111a"
-              roughness={0.3}
-              metalness={0.85}
-              clearcoat={0.5}
+              color="#0c0e16"
+              roughness={0.25}
+              metalness={0.9}
+              clearcoat={0.6}
             />
           </mesh>
-          <mesh position={[0.22, 0.05, 0]}>
-            <boxGeometry args={[0.02, 0.06, 0.8]} />
-            <meshBasicMaterial color="#38bdf8" />
+
+          {/* Die-Cast Brushed Aluminum Backplate with Geometric Cutouts */}
+          <mesh position={[0, 0.155, 0]}>
+            <boxGeometry args={[0.42, 0.01, 1.32]} />
+            <meshStandardMaterial color="#181c28" roughness={0.2} metalness={0.95} />
           </mesh>
-          {[-0.32, 0, 0.32].map((zOffset, idx) => (
-            <mesh key={idx} position={[0, -0.15, zOffset]} rotation={[Math.PI / 2, 0, 0]}>
-              <cylinderGeometry args={[0.13, 0.13, 0.02, 16]} />
-              <meshStandardMaterial color="#08080c" roughness={0.6} />
-            </mesh>
+
+          {/* Prominent Illuminated "GEFORCE RTX 5090" Side Badge */}
+          <mesh position={[0.225, 0.06, 0]} rotation={[0, Math.PI / 2, 0]}>
+            <planeGeometry args={[0.95, 0.16]} />
+            {gpuTexture ? (
+              <meshBasicMaterial map={gpuTexture} transparent />
+            ) : (
+              <meshBasicMaterial color="#38bdf8" />
+            )}
+          </mesh>
+
+          {/* Triple High-Performance Axial-Tech Fans with Glowing RGB Halos */}
+          {[-0.42, 0, 0.42].map((zOffset, idx) => (
+            <group key={idx} position={[0, -0.16, zOffset]}>
+              {/* Fan Recessed Well */}
+              <mesh rotation={[Math.PI / 2, 0, 0]}>
+                <cylinderGeometry args={[0.16, 0.16, 0.03, 20]} />
+                <meshStandardMaterial color="#06070a" roughness={0.5} />
+              </mesh>
+              {/* Fan Blades Hub */}
+              <mesh rotation={[Math.PI / 2, 0, 0]}>
+                <cylinderGeometry args={[0.06, 0.06, 0.04, 12]} />
+                <meshStandardMaterial color="#1a1e2a" metalness={0.8} />
+              </mesh>
+              {/* Glowing RGB Fan Ring Halo */}
+              <mesh position={[0, -0.015, 0]} rotation={[Math.PI / 2, 0, 0]}>
+                <ringGeometry args={[0.145, 0.165, 24]} />
+                <meshBasicMaterial color={idx === 1 ? '#38bdf8' : '#818cf8'} side={THREE.DoubleSide} />
+              </mesh>
+            </group>
           ))}
+
+          {/* 16-Pin 12V-2x6 Power Connector with Braided Cables */}
+          <group position={[0.18, 0.12, 0.35]}>
+            <mesh>
+              <boxGeometry args={[0.06, 0.05, 0.12]} />
+              <meshStandardMaterial color="#0f1118" />
+            </mesh>
+            {/* Sleeved Cable Curves */}
+            <mesh position={[0.05, 0.08, 0]}>
+              <cylinderGeometry args={[0.015, 0.015, 0.14, 8]} />
+              <meshStandardMaterial color="#1e293b" />
+            </mesh>
+          </group>
         </group>
 
-        {/* ────────── LIQUID COOLER ────────── */}
+        {/* ────────── AIO CPU LIQUID COOLER & TUBES ────────── */}
         <group ref={coolerRef} position={[-0.15, 0.35, 0]}>
+          {/* Circular Pump Block (Infinity Mirror Housing) */}
           <mesh rotation={[0, 0, Math.PI / 2]}>
-            <cylinderGeometry args={[0.18, 0.18, 0.08, 24]} />
-            <meshStandardMaterial color="#111520" roughness={0.3} metalness={0.8} />
+            <cylinderGeometry args={[0.2, 0.2, 0.09, 28]} />
+            <meshStandardMaterial color="#0d111a" roughness={0.25} metalness={0.9} />
           </mesh>
+
+          {/* Glowing Infinity Mirror Ring */}
           <mesh position={[0.05, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
-            <cylinderGeometry args={[0.14, 0.14, 0.02, 24]} />
+            <cylinderGeometry args={[0.16, 0.16, 0.02, 28]} />
             <meshBasicMaterial color="#38bdf8" />
           </mesh>
-          <mesh position={[-0.02, 0.35, 0.15]}>
-            <cylinderGeometry args={[0.025, 0.025, 0.65, 12]} />
+
+          {/* Center Digital Temp Display (Simulated 24°C Glow) */}
+          <mesh position={[0.065, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+            <cylinderGeometry args={[0.08, 0.08, 0.01, 20]} />
+            <meshBasicMaterial color="#0f172a" />
+          </mesh>
+
+          {/* Top 360mm Radiator Mounted at Case Ceiling */}
+          <mesh position={[0.12, 0.58, 0]}>
+            <boxGeometry args={[0.7, 0.08, 1.45]} />
+            <meshStandardMaterial color="#111522" roughness={0.4} metalness={0.8} />
+          </mesh>
+
+          {/* Dual Braided Liquid Coolant Tubes */}
+          <mesh position={[-0.02, 0.38, 0.15]}>
+            <cylinderGeometry args={[0.026, 0.026, 0.65, 12]} />
             <meshPhysicalMaterial
               color="#38bdf8"
               emissive="#0284c7"
-              emissiveIntensity={0.85}
+              emissiveIntensity={0.9}
               roughness={0.1}
-              transmission={0.4}
+              transmission={0.45}
               transparent
-              opacity={0.85}
+              opacity={0.88}
             />
           </mesh>
-          <mesh position={[-0.02, 0.35, -0.15]}>
-            <cylinderGeometry args={[0.025, 0.025, 0.65, 12]} />
+          <mesh position={[-0.02, 0.38, -0.15]}>
+            <cylinderGeometry args={[0.026, 0.026, 0.65, 12]} />
             <meshPhysicalMaterial
-              color="#4a9eff"
-              emissive="#1e40af"
-              emissiveIntensity={0.85}
+              color="#818cf8"
+              emissive="#4338ca"
+              emissiveIntensity={0.9}
               roughness={0.1}
-              transmission={0.4}
+              transmission={0.45}
               transparent
-              opacity={0.85}
+              opacity={0.88}
             />
           </mesh>
         </group>
 
-        {/* ────────── RAM STICKS ────────── */}
-        <group ref={ramRef} position={[-0.12, 0.45, 0.3]}>
-          {[-0.06, -0.02, 0.02, 0.06].map((zPos, idx) => (
+        {/* ────────── 4x DDR5 RGB RAM MODULES ────────── */}
+        <group ref={ramRef} position={[-0.12, 0.45, 0.32]}>
+          {[-0.07, -0.025, 0.025, 0.07].map((zPos, idx) => (
             <group key={idx} position={[0, 0, zPos]}>
+              {/* RAM Heatspreader */}
               <mesh>
-                <boxGeometry args={[0.04, 0.32, 0.025]} />
-                <meshStandardMaterial color="#1e2230" metalness={0.7} />
+                <boxGeometry args={[0.045, 0.34, 0.026]} />
+                <meshStandardMaterial color="#141824" roughness={0.2} metalness={0.8} />
               </mesh>
-              <mesh position={[0, 0.165, 0]}>
-                <boxGeometry args={[0.038, 0.02, 0.024]} />
-                <meshBasicMaterial color="#38bdf8" />
+              {/* Diffused RGB Top Spine */}
+              <mesh position={[0, 0.175, 0]}>
+                <boxGeometry args={[0.042, 0.024, 0.024]} />
+                <meshBasicMaterial color={idx % 2 === 0 ? '#38bdf8' : '#a855f7'} />
               </mesh>
             </group>
           ))}
         </group>
       </group>
 
-      {/* ────────────────── 2. ULTRAWIDE MONITOR ────────────────── */}
+      {/* ────────────────── 2. ULTRAWIDE DISPLAY / MONITOR ────────────────── */}
       <group ref={monitorRef} position={[-0.8, 0.1, -0.3]}>
         <mesh position={[0, 0, 0]}>
           <boxGeometry args={[2.5, 1.35, 0.06]} />
