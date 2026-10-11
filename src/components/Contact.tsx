@@ -1,11 +1,18 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ArrowUpRight, Copy, Check, Mail } from 'lucide-react';
+import { ArrowUpRight, Copy, Check, Mail, Radio } from 'lucide-react';
 import siteConfig from '@/config/siteConfig';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
+
+// Dynamic import of 3D Contact Singularity
+const ContactSingularity = dynamic(() => import('./shaders/ContactSingularity'), {
+  ssr: false,
+  loading: () => null,
+});
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -68,70 +75,81 @@ export default function Contact() {
     <section
       ref={sectionRef}
       id="contact"
-      className="relative py-28 md:py-44 border-t border-white/[0.08]"
+      className="relative py-32 md:py-48 border-t border-white/[0.08] overflow-hidden"
     >
-      <div className="max-w-[1400px] mx-auto px-6 md:px-12">
+      {/* 3D Singularity Particle Vortex in background */}
+      <div className="absolute right-0 bottom-0 w-[600px] h-[600px] md:w-[900px] md:h-[900px] opacity-40 pointer-events-none z-0">
+        <ContactSingularity />
+      </div>
+
+      <div className="relative z-10 max-w-[1400px] mx-auto px-6 md:px-12">
         <div className="contact-reveal mb-8">
-          <span className="text-xs uppercase tracking-[0.3em] text-[#4a9eff] font-[family-name:var(--font-space-grotesk)] block mb-3 font-semibold">
-            05 // Initiate Contact
-          </span>
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-xs uppercase tracking-[0.3em] text-[#38bdf8] font-mono font-semibold">
+              05 // INITIATE TRANSMISSION
+            </span>
+            <span className="text-white/20">•</span>
+            <span className="text-xs text-[#71717a] font-mono">
+              DIRECT UPLINK
+            </span>
+          </div>
         </div>
 
-        {/* Large Cinematic Editorial Headline */}
-        <h2 className="contact-reveal font-[family-name:var(--font-space-grotesk)] text-[clamp(2.5rem,7.5vw,7rem)] font-bold text-[#f5f5f5] leading-[0.92] tracking-tight mb-10 max-w-4xl">
+        {/* Monumental Editorial Headline */}
+        <h2 className="contact-reveal font-[family-name:var(--font-space-grotesk)] text-[clamp(2.8rem,7.8vw,7.5rem)] font-extrabold text-[#fafafa] leading-[0.9] tracking-[-0.02em] mb-10 max-w-4xl">
           Let&apos;s build
           <br />
-          <span className="text-[#888]">something memorable.</span>
+          <span className="text-[#71717a]">something memorable.</span>
         </h2>
 
-        <p className="contact-reveal text-[#a1a1aa] text-base md:text-lg max-w-xl mb-14 leading-relaxed font-[family-name:var(--font-inter)]">
-          Have an interesting project, engineering challenge, or creative technology inquiry? Let&apos;s connect.
+        <p className="contact-reveal text-[#a1a1aa] text-base md:text-xl max-w-xl mb-14 leading-relaxed font-[family-name:var(--font-inter)]">
+          Have an engineering challenge, intelligent architecture project, or creative technology inquiry? Let&apos;s engineer it into reality.
         </p>
 
-        {/* Interactive Email Bar */}
-        <div className="contact-reveal flex flex-wrap items-center gap-4 mb-16">
+        {/* Interactive Tactical Email Console */}
+        <div className="contact-reveal flex flex-wrap items-center gap-4 mb-20">
           <a
             href={`mailto:${siteConfig.email}`}
-            className="inline-flex items-center gap-3 px-8 py-4 bg-[#f5f5f5] text-[#050505] font-[family-name:var(--font-space-grotesk)] text-sm font-bold tracking-wide rounded-full hover:bg-[#4a9eff] hover:text-[#050505] transition-all duration-300 hover:scale-[1.02] shadow-[0_4px_20px_rgba(255,255,255,0.15)]"
+            className="group inline-flex items-center gap-3 px-9 py-4.5 bg-[#fafafa] text-[#050505] font-[family-name:var(--font-space-grotesk)] text-xs font-bold tracking-[0.18em] uppercase rounded-full hover:bg-[#38bdf8] hover:text-[#050505] transition-all duration-300 hover:scale-[1.02] shadow-[0_4px_24px_rgba(255,255,255,0.18)]"
           >
-            <Mail className="w-4 h-4" />
-            <span>Send Email</span>
-            <ArrowUpRight className="w-4 h-4" />
+            <Mail className="w-4 h-4 text-current" />
+            <span>Transmit Email</span>
+            <ArrowUpRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </a>
 
           <button
             onClick={handleCopyEmail}
-            className="inline-flex items-center gap-2.5 px-6 py-4 border border-white/[0.1] bg-[#0a0c12]/80 backdrop-blur-md text-[#f5f5f5] font-[family-name:var(--font-space-grotesk)] text-sm font-medium rounded-full hover:border-[#4a9eff] hover:text-[#4a9eff] transition-all duration-300"
+            className="inline-flex items-center gap-2.5 px-7 py-4.5 border border-white/[0.12] bg-[#07080e]/85 backdrop-blur-xl text-[#fafafa] font-[family-name:var(--font-space-grotesk)] text-xs font-semibold tracking-wider uppercase rounded-full hover:border-[#38bdf8] hover:text-[#38bdf8] transition-all duration-300"
             aria-label="Copy email address"
           >
             {copied ? (
               <>
                 <Check className="w-4 h-4 text-emerald-400" />
-                <span className="text-emerald-400">Copied to Clipboard</span>
+                <span className="text-emerald-400 font-mono">COPIED TO CLIPBOARD</span>
               </>
             ) : (
               <>
-                <Copy className="w-4 h-4 text-[#888]" />
-                <span>{siteConfig.email}</span>
+                <Copy className="w-4 h-4 text-[#71717a]" />
+                <span className="font-mono">{siteConfig.email}</span>
               </>
             )}
           </button>
         </div>
 
-        {/* Links & Telemetry Grid */}
+        {/* Telemetry Footer Grid */}
         <div className="contact-reveal pt-12 border-t border-white/[0.08] grid grid-cols-1 md:grid-cols-2 gap-8 items-center justify-between">
           {/* Social Profiles */}
-          <div className="flex flex-wrap items-center gap-6">
+          <div className="flex flex-wrap items-center gap-8">
             {socialLinks.map((link) => (
               <a
                 key={link.label}
                 href={link.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex items-center gap-2 text-sm text-[#888] hover:text-[#f5f5f5] font-[family-name:var(--font-space-grotesk)] transition-colors duration-200"
+                className="group flex items-center gap-2 text-sm text-[#71717a] hover:text-[#fafafa] font-[family-name:var(--font-space-grotesk)] transition-colors duration-200"
               >
-                <span>{link.label}</span>
-                <span className="text-[11px] text-[#555] font-mono group-hover:text-[#4a9eff] transition-colors">
+                <span className="font-medium tracking-wide">{link.label}</span>
+                <span className="text-[11px] text-[#52525b] font-mono group-hover:text-[#38bdf8] transition-colors">
                   {link.handle}
                 </span>
                 <ArrowUpRight className="w-3.5 h-3.5 opacity-40 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200" />
@@ -140,13 +158,16 @@ export default function Contact() {
           </div>
 
           {/* Telemetry info */}
-          <div className="flex md:justify-end items-center gap-6 text-[11px] font-mono text-[#555]">
+          <div className="flex md:justify-end items-center gap-6 text-[11px] font-mono text-[#71717a]">
             <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               <span>TIMEZONE: IST (UTC+5:30)</span>
             </div>
             <span>•</span>
-            <span>REMOTE / GLOBAL</span>
+            <div className="flex items-center gap-1.5">
+              <Radio className="w-3.5 h-3.5 text-[#38bdf8]" />
+              <span>STATUS: AVAILABLE FOR SELECT ROLES</span>
+            </div>
           </div>
         </div>
       </div>

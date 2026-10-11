@@ -8,18 +8,20 @@ import Contact from '@/components/Contact';
 import Footer from '@/components/Footer';
 import CustomCursor from '@/components/CustomCursor';
 import GlobalCanvas from '@/components/GlobalCanvas';
+import FilmGrain from '@/components/FilmGrain';
 
 export default function Home() {
   return (
     <>
       <CustomCursor />
+      <FilmGrain />
 
-      {/* Persistent 3D Canvas: starts in Hero, pops out, and settles in bottom corner across all sections */}
+      {/* ABSOLUTE PRIORITY 1: Persistent 3D Workstation Canvas (hero -> pop-out -> corner docked) */}
       <GlobalCanvas />
 
       <Navigation />
 
-      {/* Editorial content layers */}
+      {/* Editorial Content Layers */}
       <main id="main-content" className="relative z-10">
         <Hero />
         <Work />

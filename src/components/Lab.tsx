@@ -6,84 +6,21 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import siteConfig from '@/config/siteConfig';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { Terminal } from 'lucide-react';
+import LabShaderCanvas from './shaders/LabShaderCanvas';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const labelColors: Record<string, string> = {
-  Experiment: 'text-purple-400 border-purple-400/30 bg-purple-500/5',
-  Study: 'text-cyan-400 border-cyan-400/30 bg-cyan-500/5',
-  Prototype: 'text-amber-400 border-amber-400/30 bg-amber-500/5',
+  Experiment: 'text-purple-400 border-purple-400/30 bg-purple-500/10',
+  Study: 'text-sky-400 border-sky-400/30 bg-sky-500/10',
+  Prototype: 'text-amber-400 border-amber-400/30 bg-amber-500/10',
 };
 
-// Generative micro visual for lab experiments
-function LabCardVisual({ index }: { index: number }) {
-  if (index === 0) {
-    // GLSL Shader waves
-    return (
-      <div className="h-28 w-full rounded-lg bg-[#07070b] border border-[#16161c] mb-6 flex items-center justify-center overflow-hidden relative">
-        <svg viewBox="0 0 200 60" className="w-full h-full text-purple-400/40">
-          <path
-            d="M 0 30 Q 25 10 50 30 T 100 30 T 150 30 T 200 30"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            className="animate-pulse"
-          />
-          <path
-            d="M 0 30 Q 25 45 50 30 T 100 30 T 150 30 T 200 30"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1"
-            strokeOpacity="0.5"
-          />
-        </svg>
-        <span className="absolute bottom-2 right-2 text-[9px] font-mono text-[#555]">
-          GLSL / FRAG
-        </span>
-      </div>
-    );
-  }
-
-  if (index === 1) {
-    // Generative Topology point matrix
-    return (
-      <div className="h-28 w-full rounded-lg bg-[#07070b] border border-[#16161c] mb-6 flex items-center justify-center overflow-hidden relative">
-        <svg viewBox="0 0 160 60" className="w-full h-full text-cyan-400/40">
-          <g>
-            {[...Array(6)].map((_, r) =>
-              [...Array(12)].map((_, c) => (
-                <circle
-                  key={`${r}-${c}`}
-                  cx={15 + c * 12}
-                  cy={10 + r * 8}
-                  r="1.2"
-                  fill="currentColor"
-                  opacity={(r + c) % 3 === 0 ? 0.9 : 0.3}
-                />
-              ))
-            )}
-          </g>
-        </svg>
-        <span className="absolute bottom-2 right-2 text-[9px] font-mono text-[#555]">
-          MESH / SDF
-        </span>
-      </div>
-    );
-  }
-
-  // Neural Vision Pipeline scan line
-  return (
-    <div className="h-28 w-full rounded-lg bg-[#07070b] border border-[#16161c] mb-6 flex items-center justify-center overflow-hidden relative">
-      <div className="w-16 h-16 rounded border border-amber-400/40 relative flex items-center justify-center">
-        <div className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
-        <div className="absolute inset-x-0 h-[1px] bg-amber-400/70 top-1/2 animate-pulse" />
-      </div>
-      <span className="absolute bottom-2 right-2 text-[9px] font-mono text-[#555]">
-        TENSOR / OPENCV
-      </span>
-    </div>
-  );
-}
+const shaderTypes: ('raymarching' | 'topology' | 'neural')[] = [
+  'raymarching',
+  'topology',
+  'neural',
+];
 
 export default function Lab() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -119,53 +56,68 @@ export default function Lab() {
     <section
       ref={sectionRef}
       id="lab"
-      className="relative py-28 md:py-44 border-t border-white/[0.08]"
+      className="relative py-32 md:py-48 border-t border-white/[0.08]"
     >
       <div className="max-w-[1400px] mx-auto px-6 md:px-12">
         {/* Header */}
-        <div className="mb-16 md:mb-20 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="mb-20 md:mb-28 flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div>
-            <span className="text-xs uppercase tracking-[0.3em] text-[#4a9eff] font-[family-name:var(--font-space-grotesk)] block mb-3 font-semibold">
-              04 // The Lab
-            </span>
-            <h2 className="font-[family-name:var(--font-space-grotesk)] text-[clamp(2.5rem,6vw,5.5rem)] font-bold text-[#f5f5f5] leading-[0.95]">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="text-xs uppercase tracking-[0.3em] text-[#38bdf8] font-mono font-semibold">
+                04 // THE LAB &amp; COMPUTATIONAL EXPERIMENTS
+              </span>
+              <span className="text-white/20">•</span>
+              <span className="text-xs text-[#71717a] font-mono">
+                REAL-TIME GLSL
+              </span>
+            </div>
+
+            <h2 className="font-[family-name:var(--font-space-grotesk)] text-[clamp(2.8rem,6.5vw,6rem)] font-extrabold text-[#fafafa] leading-[0.92] tracking-tight">
               Prototypes &amp;
               <br />
-              <span className="text-[#888]">Creative Coding</span>
+              <span className="text-[#71717a]">Creative Coding</span>
             </h2>
           </div>
-          <p className="text-[#888] text-sm md:text-base max-w-sm font-[family-name:var(--font-inter)] leading-relaxed">
-            Exploratory sketches, GPU shader programming, computational geometry, and experimental interfaces.
+          <p className="text-[#a1a1aa] text-base md:text-lg max-w-md font-[family-name:var(--font-inter)] leading-relaxed">
+            Real-time GPU fragment shaders, procedural signed distance fields (SDFs), generative topological physics, and neural vision experiments.
           </p>
         </div>
 
-        {/* 3 Column Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* 3 Column Interactive Shader Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {siteConfig.experiments.map((exp, i) => (
             <div
               key={exp.title}
-              className="lab-card group relative p-7 rounded-2xl border border-white/[0.08] bg-[#08090e]/75 backdrop-blur-md hover:border-white/[0.22] hover:bg-[#0b0d15]/85 transition-all duration-400 shadow-[0_4px_24px_rgba(0,0,0,0.3)] flex flex-col justify-between"
+              className="lab-card group relative p-8 rounded-2xl border border-white/[0.08] bg-[#07080e]/85 backdrop-blur-xl hover:border-white/[0.25] hover:bg-[#0a0c16]/90 transition-all duration-500 shadow-[0_8px_32px_rgba(0,0,0,0.4)] flex flex-col justify-between"
             >
               <div>
-                {/* Header row */}
+                {/* Header telemetry row */}
                 <div className="flex items-center justify-between gap-3 mb-6">
                   <span
-                    className={`inline-block text-[10px] tracking-[0.18em] uppercase px-3 py-1 border rounded-full font-medium ${
-                      labelColors[exp.label] || 'text-[#888] border-[#888]/30'
+                    className={`inline-block text-[10px] tracking-[0.2em] uppercase px-3 py-1 border rounded-full font-mono font-medium ${
+                      labelColors[exp.label] || 'text-[#71717a] border-white/[0.1]'
                     }`}
                   >
                     {exp.label}
                   </span>
-                  <div className="flex items-center gap-1.5 text-xs text-[#666] font-mono">
-                    <Terminal className="w-3.5 h-3.5" />
+                  <div className="flex items-center gap-1.5 text-xs text-[#71717a] font-mono">
+                    <Terminal className="w-3.5 h-3.5 text-[#38bdf8]" />
                     <span>EXP_0{i + 1}</span>
                   </div>
                 </div>
 
-                {/* Animated visual snippet */}
-                <LabCardVisual index={i} />
+                {/* Real-Time Live WebGL GLSL Shader Viewport */}
+                <div className="h-44 w-full rounded-xl bg-[#030408] border border-white/[0.08] mb-6 overflow-hidden relative shadow-inner">
+                  <LabShaderCanvas type={shaderTypes[i]} />
+                  <div className="absolute top-2 left-2 px-2 py-0.5 rounded bg-black/60 backdrop-blur-sm border border-white/[0.08] text-[9px] font-mono text-[#38bdf8] pointer-events-none">
+                    GLSL // 60FPS
+                  </div>
+                  <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/60 backdrop-blur-sm border border-white/[0.08] text-[9px] font-mono text-[#71717a] pointer-events-none">
+                    HOVER TO WARP
+                  </div>
+                </div>
 
-                <h3 className="font-[family-name:var(--font-space-grotesk)] text-xl font-bold text-[#fafafa] mb-3 group-hover:text-[#4a9eff] transition-colors duration-300">
+                <h3 className="font-[family-name:var(--font-space-grotesk)] text-xl font-bold text-[#fafafa] mb-3 group-hover:text-[#38bdf8] transition-colors duration-300">
                   {exp.title}
                 </h3>
 
@@ -175,13 +127,13 @@ export default function Lab() {
               </div>
 
               {/* Status footer */}
-              <div className="pt-4 border-t border-white/[0.08] flex items-center justify-between text-[11px] font-mono text-[#666]">
-                <span>STATUS: UNPUBLISHED STUDY</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-[#4a9eff]/60" />
+              <div className="pt-4 border-t border-white/[0.06] flex items-center justify-between text-[11px] font-mono text-[#71717a]">
+                <span>STATUS: LIVE GLSL STUDY</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
               </div>
 
-              {/* Subtle hover gradient */}
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#4a9eff]/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400 pointer-events-none" />
+              {/* Subtle hover accent light */}
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#38bdf8]/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
             </div>
           ))}
         </div>
