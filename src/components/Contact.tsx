@@ -68,7 +68,7 @@ export default function Contact() {
     <section
       ref={sectionRef}
       id="contact"
-      className="relative py-28 md:py-44 border-t border-[#1a1a1a]"
+      className="relative py-28 md:py-44 border-t border-white/[0.08]"
     >
       <div className="max-w-[1400px] mx-auto px-6 md:px-12">
         <div className="contact-reveal mb-8">
@@ -84,7 +84,7 @@ export default function Contact() {
           <span className="text-[#888]">something memorable.</span>
         </h2>
 
-        <p className="contact-reveal text-[#888] text-base md:text-lg max-w-xl mb-14 leading-relaxed font-[family-name:var(--font-inter)]">
+        <p className="contact-reveal text-[#a1a1aa] text-base md:text-lg max-w-xl mb-14 leading-relaxed font-[family-name:var(--font-inter)]">
           Have an interesting project, engineering challenge, or creative technology inquiry? Let&apos;s connect.
         </p>
 
@@ -92,7 +92,7 @@ export default function Contact() {
         <div className="contact-reveal flex flex-wrap items-center gap-4 mb-16">
           <a
             href={`mailto:${siteConfig.email}`}
-            className="inline-flex items-center gap-3 px-8 py-4 bg-[#f5f5f5] text-[#050505] font-[family-name:var(--font-space-grotesk)] text-sm font-bold tracking-wide rounded-full hover:bg-[#4a9eff] hover:text-[#050505] transition-all duration-300 hover:scale-[1.02]"
+            className="inline-flex items-center gap-3 px-8 py-4 bg-[#f5f5f5] text-[#050505] font-[family-name:var(--font-space-grotesk)] text-sm font-bold tracking-wide rounded-full hover:bg-[#4a9eff] hover:text-[#050505] transition-all duration-300 hover:scale-[1.02] shadow-[0_4px_20px_rgba(255,255,255,0.15)]"
           >
             <Mail className="w-4 h-4" />
             <span>Send Email</span>
@@ -101,7 +101,7 @@ export default function Contact() {
 
           <button
             onClick={handleCopyEmail}
-            className="inline-flex items-center gap-2.5 px-6 py-4 border border-[#222] bg-[#0d0d10] text-[#f5f5f5] font-[family-name:var(--font-space-grotesk)] text-sm font-medium rounded-full hover:border-[#4a9eff] hover:text-[#4a9eff] transition-all duration-300"
+            className="inline-flex items-center gap-2.5 px-6 py-4 border border-white/[0.1] bg-[#0a0c12]/80 backdrop-blur-md text-[#f5f5f5] font-[family-name:var(--font-space-grotesk)] text-sm font-medium rounded-full hover:border-[#4a9eff] hover:text-[#4a9eff] transition-all duration-300"
             aria-label="Copy email address"
           >
             {copied ? (
@@ -119,7 +119,7 @@ export default function Contact() {
         </div>
 
         {/* Links & Telemetry Grid */}
-        <div className="contact-reveal pt-12 border-t border-[#1a1a1a] grid grid-cols-1 md:grid-cols-2 gap-8 items-center justify-between">
+        <div className="contact-reveal pt-12 border-t border-white/[0.08] grid grid-cols-1 md:grid-cols-2 gap-8 items-center justify-between">
           {/* Social Profiles */}
           <div className="flex flex-wrap items-center gap-6">
             {socialLinks.map((link) => (

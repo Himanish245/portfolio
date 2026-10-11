@@ -5,29 +5,26 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { Environment, Sparkles } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import * as THREE from 'three';
-import { useMousePosition } from '@/hooks/useMousePosition';
 import { useMobileDetect } from '@/hooks/useMobileDetect';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { useScrollProgress, globalScrollProgress } from '@/hooks/useScrollProgress';
 import PCModel from './PCModel';
 
 function CameraRig({ isMobile }: { isMobile: boolean }) {
-  const mouse = useMousePosition();
-
-  useFrame((state) => {
+  useFrame((state, delta) => {
     const p = globalScrollProgress.target;
-    // Consistent, single-track camera depth
+    // Consistent, single-track camera depth with delta damping
     const targetZ = THREE.MathUtils.lerp(4.2, 4.4, p) + (isMobile ? 0.7 : 0);
-    state.camera.position.z = THREE.MathUtils.lerp(state.camera.position.z, targetZ, 0.08);
+    state.camera.position.z = THREE.MathUtils.damp(state.camera.position.z, targetZ, 4, delta);
 
     if (!isMobile) {
       const mouseDamp = 0.12 * (1 - p * 0.7);
-      const targetX = mouse.x * mouseDamp;
-      const targetY = 0.22 + mouse.y * (mouseDamp * 0.5);
-      state.camera.position.x = THREE.MathUtils.lerp(state.camera.position.x, targetX, 0.05);
-      state.camera.position.y = THREE.MathUtils.lerp(state.camera.position.y, targetY, 0.05);
+      const targetX = state.pointer.x * mouseDamp;
+      const targetY = 0.22 + state.pointer.y * (mouseDamp * 0.5);
+      state.camera.position.x = THREE.MathUtils.damp(state.camera.position.x, targetX, 5, delta);
+      state.camera.position.y = THREE.MathUtils.damp(state.camera.position.y, targetY, 5, delta);
     } else {
-      state.camera.position.y = THREE.MathUtils.lerp(state.camera.position.y, 0.18, 0.05);
+      state.camera.position.y = THREE.MathUtils.damp(state.camera.position.y, 0.18, 5, delta);
     }
 
     state.camera.lookAt(0, -0.05, 0);
@@ -54,7 +51,6 @@ function CinematicWorkstationLighting() {
         position={[4, 5, 4.5]}
         intensity={2.2}
         color="#38bdf8"
-        castShadow
       />
       <pointLight
         position={[-3.5, -0.5, 2.5]}
@@ -84,11 +80,11 @@ function Scene({ isMobile }: { isMobile: boolean }) {
       <PCModel isMobile={isMobile} />
 
       <Sparkles
-        count={isMobile ? 25 : 60}
+        count={isMobile ? 16 : 38}
         scale={[6, 4, 5]}
-        size={isMobile ? 1.4 : 2.0}
-        speed={0.25}
-        opacity={0.35}
+        size={isMobile ? 1.2 : 1.6}
+        speed={0.2}
+        opacity={0.25}
         color="#38bdf8"
       />
 
@@ -97,9 +93,9 @@ function Scene({ isMobile }: { isMobile: boolean }) {
       {!isMobile && (
         <EffectComposer>
           <Bloom
-            luminanceThreshold={0.7}
-            luminanceSmoothing={0.85}
-            intensity={0.42}
+            luminanceThreshold={0.8}
+            luminanceSmoothing={0.9}
+            intensity={0.35}
           />
         </EffectComposer>
       )}

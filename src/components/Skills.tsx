@@ -43,7 +43,7 @@ export default function Skills() {
     <section
       ref={sectionRef}
       id="skills"
-      className="relative py-28 md:py-44 border-t border-[#1a1a1a]"
+      className="relative py-28 md:py-44 border-t border-white/[0.08]"
     >
       <div className="max-w-[1400px] mx-auto px-6 md:px-12">
         {/* Section Header */}
@@ -70,7 +70,7 @@ export default function Skills() {
             className={`px-4 py-2 rounded-full text-xs font-mono tracking-wider transition-all duration-300 ${
               activeCategory === null
                 ? 'bg-[#4a9eff] text-[#050505] font-semibold'
-                : 'bg-[#111] text-[#888] border border-[#222] hover:text-[#f5f5f5] hover:border-[#444]'
+                : 'bg-white/[0.03] text-[#888] border border-white/[0.08] hover:text-[#f5f5f5] hover:border-white/[0.2]'
             }`}
           >
             SHOW ALL
@@ -82,7 +82,7 @@ export default function Skills() {
               className={`px-4 py-2 rounded-full text-xs font-mono tracking-wider transition-all duration-300 ${
                 activeCategory === category.name
                   ? 'bg-[#4a9eff] text-[#050505] font-semibold'
-                  : 'bg-[#111] text-[#888] border border-[#222] hover:text-[#f5f5f5] hover:border-[#444]'
+                  : 'bg-white/[0.03] text-[#888] border border-white/[0.08] hover:text-[#f5f5f5] hover:border-white/[0.2]'
               }`}
             >
               {category.name.toUpperCase()}
@@ -97,20 +97,20 @@ export default function Skills() {
             return (
               <div
                 key={category.name}
-                className={`skill-card p-8 rounded-xl border bg-[#0a0a0d] transition-all duration-400 ${
+                className={`skill-card p-8 rounded-2xl border bg-[#08090e]/75 backdrop-blur-md transition-all duration-400 shadow-[0_4px_24px_rgba(0,0,0,0.3)] ${
                   isHighlighted
-                    ? 'border-[#222] hover:border-[#4a9eff]/40 opacity-100'
-                    : 'border-[#141414] opacity-35'
+                    ? 'border-white/[0.08] hover:border-white/[0.22] hover:bg-[#0b0d15]/85 opacity-100'
+                    : 'border-white/[0.04] opacity-35'
                 }`}
               >
-                <div className="flex items-center justify-between mb-8 pb-4 border-b border-[#1a1a1a]">
-                  <span className="text-[11px] font-mono text-[#555]">
+                <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/[0.08]">
+                  <span className="text-[11px] font-mono text-[#666]">
                     0{idx + 1}
                   </span>
                   <span className="w-1.5 h-1.5 rounded-full bg-[#4a9eff]" />
                 </div>
 
-                <h3 className="font-[family-name:var(--font-space-grotesk)] text-lg font-bold text-[#f5f5f5] mb-6 tracking-wide">
+                <h3 className="font-[family-name:var(--font-space-grotesk)] text-lg font-bold text-[#fafafa] mb-6 tracking-wide">
                   {category.name}
                 </h3>
 
@@ -118,10 +118,10 @@ export default function Skills() {
                   {category.skills.map((skill) => (
                     <li
                       key={skill}
-                      className="group flex items-center justify-between text-[#888] hover:text-[#f5f5f5] transition-colors duration-200 text-sm font-[family-name:var(--font-inter)]"
+                      className="group flex items-center justify-between text-[#a1a1aa] hover:text-[#fafafa] transition-colors duration-200 text-sm font-[family-name:var(--font-inter)]"
                     >
                       <span>{skill}</span>
-                      <span className="text-[10px] text-[#444] group-hover:text-[#4a9eff] transition-colors font-mono">
+                      <span className="text-[10px] text-[#555] group-hover:text-[#4a9eff] transition-colors font-mono">
                         //
                       </span>
                     </li>

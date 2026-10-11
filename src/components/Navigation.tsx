@@ -85,7 +85,7 @@ export default function Navigation() {
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
-            ? 'bg-[#050505]/85 backdrop-blur-xl border-b border-[#1a1a1a]'
+            ? 'bg-[#05060a]/80 backdrop-blur-xl border-b border-white/[0.08]'
             : 'bg-transparent'
         }`}
         role="navigation"
@@ -97,14 +97,14 @@ export default function Navigation() {
             <a
               href="#"
               onClick={() => playFeedbackSound(440)}
-              className="font-[family-name:var(--font-space-grotesk)] text-sm tracking-[0.3em] uppercase font-bold text-[#f5f5f5] hover:text-[#4a9eff] transition-colors duration-300"
+              className="font-[family-name:var(--font-space-grotesk)] text-sm tracking-[0.3em] uppercase font-bold text-[#fafafa] hover:text-[#4a9eff] transition-colors duration-300"
               aria-label="Home"
             >
               {siteConfig.name}
             </a>
-            <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-full border border-[#1a1a1a] bg-[#111]/60">
+            <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-full border border-white/[0.08] bg-white/[0.03] backdrop-blur-sm">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[10px] tracking-widest uppercase text-[#888] font-[family-name:var(--font-inter)]">
+              <span className="text-[10px] tracking-widest uppercase text-[#a1a1aa] font-[family-name:var(--font-inter)]">
                 Available
               </span>
             </div>
@@ -154,7 +154,7 @@ export default function Navigation() {
                   } catch {}
                 }
               }}
-              className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] text-[#888] hover:text-[#f5f5f5] border border-[#1a1a1a] hover:border-[#333] rounded-full transition-all duration-300"
+              className="flex items-center gap-1.5 px-3 py-1 text-[11px] text-[#888] hover:text-[#fafafa] border border-white/[0.08] hover:border-white/[0.2] bg-white/[0.02] rounded-full transition-all duration-300"
               title={soundEnabled ? 'Mute sound effects' : 'Enable audio feedback'}
               aria-label={soundEnabled ? 'Mute sound' : 'Enable sound'}
             >

@@ -199,12 +199,12 @@ export default function ProjectCard({ project, index, featured }: ProjectCardPro
             ? 'transform 0.15s ease-out, border-color 0.4s ease'
             : 'transform 0.5s ease-out, border-color 0.4s ease',
         }}
-        className={`group relative block overflow-hidden rounded-xl border border-[#1a1a1a] bg-[#0a0a0a] hover:border-[#333] ${
+        className={`group relative block overflow-hidden rounded-2xl border border-white/[0.08] bg-[#08090e]/75 backdrop-blur-md hover:border-white/[0.22] hover:bg-[#0b0d15]/85 transition-all duration-500 shadow-[0_8px_32px_rgba(0,0,0,0.4)] ${
           featured ? 'min-h-[420px] md:min-h-[480px]' : 'min-h-[380px]'
         } ${project.link ? 'cursor-pointer' : ''}`}
       >
-        {/* Background gradient & noise */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0c0c14] via-[#08080c] to-[#040406]" />
+        {/* Background subtle gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0e111a]/50 via-[#07080d]/80 to-[#040407] pointer-events-none" />
         
         {/* Procedural generative project artwork */}
         <ProjectVisual title={project.title} />
@@ -219,8 +219,8 @@ export default function ProjectCard({ project, index, featured }: ProjectCardPro
           />
         )}
 
-        {/* Noise overlay texture */}
-        <div className="absolute inset-0 opacity-[0.15] mix-blend-overlay pointer-events-none bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]" />
+        {/* Ultra-subtle noise overlay */}
+        <div className="absolute inset-0 opacity-[0.04] mix-blend-overlay pointer-events-none bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]" />
 
         {/* Content container */}
         <div className="relative z-10 h-full p-8 md:p-10 flex flex-col justify-between">
@@ -233,7 +233,7 @@ export default function ProjectCard({ project, index, featured }: ProjectCardPro
               {statusLabels[project.status]}
             </span>
 
-            <span className="font-[family-name:var(--font-space-grotesk)] text-xs text-[#555] tracking-widest font-mono">
+            <span className="font-[family-name:var(--font-space-grotesk)] text-xs text-[#666] tracking-widest font-mono">
               0{index + 1} // 04
             </span>
           </div>
@@ -242,7 +242,7 @@ export default function ProjectCard({ project, index, featured }: ProjectCardPro
           <div>
             <div className="flex items-start justify-between gap-4 mb-3">
               <h3
-                className={`font-[family-name:var(--font-space-grotesk)] font-bold text-[#f5f5f5] tracking-tight group-hover:text-[#4a9eff] transition-colors duration-300 ${
+                className={`font-[family-name:var(--font-space-grotesk)] font-bold text-[#fafafa] tracking-tight group-hover:text-[#4a9eff] transition-colors duration-300 ${
                   featured ? 'text-3xl md:text-5xl' : 'text-2xl md:text-3xl'
                 }`}
               >
@@ -255,19 +255,19 @@ export default function ProjectCard({ project, index, featured }: ProjectCardPro
               )}
             </div>
 
-            <p className="text-[#888] text-sm md:text-base mb-6 max-w-xl leading-relaxed font-[family-name:var(--font-inter)]">
+            <p className="text-[#a1a1aa] text-sm md:text-base mb-6 max-w-xl leading-relaxed font-[family-name:var(--font-inter)]">
               {project.description}
             </p>
 
             {/* Category and technology pills */}
-            <div className="flex flex-wrap items-center gap-2 pt-4 border-t border-[#1a1a1a]/80">
+            <div className="flex flex-wrap items-center gap-2 pt-4 border-t border-white/[0.08]">
               <span className="text-[11px] tracking-[0.15em] uppercase text-[#4a9eff] font-[family-name:var(--font-space-grotesk)] font-semibold mr-2">
                 {project.category}
               </span>
               {project.technologies.map((tech) => (
                 <span
                   key={tech}
-                  className="text-[11px] text-[#777] bg-[#141414] px-2.5 py-0.5 rounded border border-[#222] font-[family-name:var(--font-inter)]"
+                  className="text-[11px] text-[#a1a1aa] bg-white/[0.03] px-2.5 py-0.5 rounded-md border border-white/[0.07] font-[family-name:var(--font-inter)]"
                 >
                   {tech}
                 </span>

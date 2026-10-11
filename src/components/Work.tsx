@@ -65,7 +65,7 @@ export default function Work() {
     <section
       ref={sectionRef}
       id="work"
-      className="relative py-28 md:py-44 border-t border-[#1a1a1a]"
+      className="relative py-28 md:py-44 border-t border-white/[0.08]"
     >
       <div className="max-w-[1400px] mx-auto px-6 md:px-12">
         {/* Editorial Section Heading */}

@@ -65,7 +65,7 @@ export default function About() {
     <section
       ref={sectionRef}
       id="about"
-      className="relative py-28 md:py-44 border-t border-[#1a1a1a]"
+      className="relative py-28 md:py-44 border-t border-white/[0.08]"
     >
       <div className="max-w-[1400px] mx-auto px-6 md:px-12">
         {/* Section Heading */}
@@ -98,13 +98,13 @@ export default function About() {
 
             {/* Quick spec pills */}
             <div className="about-reveal pt-6 flex flex-wrap gap-3">
-              <span className="px-3.5 py-1.5 rounded-full border border-[#222] bg-[#111] text-xs font-mono text-[#aaa]">
+              <span className="px-3.5 py-1.5 rounded-full border border-white/[0.08] bg-white/[0.03] text-xs font-mono text-[#a1a1aa]">
                 STACK: Full-Stack &amp; Systems
               </span>
-              <span className="px-3.5 py-1.5 rounded-full border border-[#222] bg-[#111] text-xs font-mono text-[#aaa]">
+              <span className="px-3.5 py-1.5 rounded-full border border-white/[0.08] bg-white/[0.03] text-xs font-mono text-[#a1a1aa]">
                 FOCUS: Security &amp; AI
               </span>
-              <span className="px-3.5 py-1.5 rounded-full border border-[#222] bg-[#111] text-xs font-mono text-[#aaa]">
+              <span className="px-3.5 py-1.5 rounded-full border border-white/[0.08] bg-white/[0.03] text-xs font-mono text-[#a1a1aa]">
                 LAB: ATL Coordinator
               </span>
             </div>
@@ -117,15 +117,15 @@ export default function About() {
               return (
                 <div
                   key={pillar.title}
-                  className="about-reveal group p-6 rounded-xl border border-[#1a1a1a] bg-[#0c0c0f] hover:border-[#333] transition-all duration-400"
+                  className="about-reveal group p-6 rounded-2xl border border-white/[0.08] bg-[#08090e]/75 backdrop-blur-md hover:border-white/[0.22] hover:bg-[#0b0d15]/85 transition-all duration-300 shadow-[0_4px_24px_rgba(0,0,0,0.3)]"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-[#161620] border border-[#222] flex items-center justify-center text-[#4a9eff] mb-5 group-hover:scale-105 group-hover:border-[#4a9eff]/40 transition-all duration-300">
+                  <div className="w-10 h-10 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-[#4a9eff] mb-5 group-hover:scale-105 group-hover:border-[#4a9eff]/50 transition-all duration-300">
                     <Icon className="w-5 h-5" />
                   </div>
-                  <h3 className="font-[family-name:var(--font-space-grotesk)] text-lg font-bold text-[#f5f5f5] mb-2 tracking-tight">
+                  <h3 className="font-[family-name:var(--font-space-grotesk)] text-lg font-bold text-[#fafafa] mb-2 tracking-tight">
                     {pillar.title}
                   </h3>
-                  <p className="text-[#888] text-xs leading-relaxed font-[family-name:var(--font-inter)]">
+                  <p className="text-[#a1a1aa] text-xs leading-relaxed font-[family-name:var(--font-inter)]">
                     {pillar.desc}
                   </p>
                 </div>

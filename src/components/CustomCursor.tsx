@@ -1,14 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 
 export default function CustomCursor() {
-  const [position, setPosition] = useState({ x: -100, y: -100 });
-  const [trailingPos, setTrailingPos] = useState({ x: -100, y: -100 });
-  const [isHovered, setIsHovered] = useState(false);
-  const [isClicked, setIsClicked] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
+  const dotRef = useRef<HTMLDivElement>(null);
+  const ringRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
 
   useEffect(() => {
@@ -22,42 +19,76 @@ export default function CustomCursor() {
     let currentY = -100;
     let animationFrameId: number;
 
+    const dot = dotRef.current;
+    const ring = ringRef.current;
+
     const handleMouseMove = (e: MouseEvent) => {
       targetX = e.clientX;
       targetY = e.clientY;
-      setPosition({ x: targetX, y: targetY });
-      if (!isVisible) setIsVisible(true);
+      if (dot) {
+        dot.style.opacity = '1';
+        dot.style.transform = `translate3d(${targetX}px, ${targetY}px, 0)`;
+      }
+      if (ring) {
+        ring.style.opacity = '1';
+      }
     };
 
-    const handleMouseDown = () => setIsClicked(true);
-    const handleMouseUp = () => setIsClicked(false);
+    const handleMouseDown = () => {
+      if (ring) {
+        ring.style.width = '24px';
+        ring.style.height = '24px';
+        ring.style.borderColor = 'rgba(74, 158, 255, 0.8)';
+      }
+    };
 
-    // Smooth lerp for outer ring
+    const handleMouseUp = () => {
+      if (ring) {
+        ring.style.width = '32px';
+        ring.style.height = '32px';
+        ring.style.borderColor = 'rgba(245, 245, 245, 0.3)';
+      }
+    };
+
+    // Smooth lerp for outer ring directly on DOM (0% React overhead)
     const loop = () => {
-      currentX += (targetX - currentX) * 0.15;
-      currentY += (targetY - currentY) * 0.15;
-      setTrailingPos({ x: currentX, y: currentY });
+      currentX += (targetX - currentX) * 0.18;
+      currentY += (targetY - currentY) * 0.18;
+      if (ring) {
+        ring.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+      }
       animationFrameId = requestAnimationFrame(loop);
     };
 
     animationFrameId = requestAnimationFrame(loop);
 
-    // Check hovered elements
+    // Check hovered interactive elements
     const handleMouseOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement | null;
-      if (!target) return;
+      if (!target || !ring) return;
       const interactive = target.closest('a, button, input, textarea, [role="button"], .interactive-hover');
-      setIsHovered(!!interactive);
+      if (interactive) {
+        ring.style.width = '48px';
+        ring.style.height = '48px';
+        ring.style.borderColor = '#4a9eff';
+        ring.style.backgroundColor = 'rgba(74, 158, 255, 0.08)';
+      } else {
+        ring.style.width = '32px';
+        ring.style.height = '32px';
+        ring.style.borderColor = 'rgba(245, 245, 245, 0.3)';
+        ring.style.backgroundColor = 'transparent';
+      }
     };
 
     const handleMouseLeave = () => {
-      setIsVisible(false);
+      if (dot) dot.style.opacity = '0';
+      if (ring) ring.style.opacity = '0';
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mousedown', handleMouseDown);
-    window.addEventListener('mouseup', handleMouseUp);
-    window.addEventListener('mouseover', handleMouseOver);
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    window.addEventListener('mousedown', handleMouseDown, { passive: true });
+    window.addEventListener('mouseup', handleMouseUp, { passive: true });
+    window.addEventListener('mouseover', handleMouseOver, { passive: true });
     document.addEventListener('mouseleave', handleMouseLeave);
 
     return () => {
@@ -68,35 +99,21 @@ export default function CustomCursor() {
       document.removeEventListener('mouseleave', handleMouseLeave);
       cancelAnimationFrame(animationFrameId);
     };
-  }, [isVisible, reducedMotion]);
+  }, [reducedMotion]);
 
-  if (reducedMotion || !isVisible) return null;
+  if (reducedMotion) return null;
 
   return (
     <div className="hidden md:block pointer-events-none fixed inset-0 z-[999] overflow-hidden">
       {/* Small center dot */}
       <div
-        className="fixed w-2 h-2 bg-[#4a9eff] rounded-full pointer-events-none -translate-x-1/2 -translate-y-1/2 transition-opacity duration-300"
-        style={{
-          left: `${position.x}px`,
-          top: `${position.y}px`,
-          opacity: isVisible ? 1 : 0,
-        }}
+        ref={dotRef}
+        className="fixed top-0 left-0 w-2 h-2 -ml-1 -mt-1 bg-[#4a9eff] rounded-full pointer-events-none opacity-0 transition-opacity duration-300 will-change-transform"
       />
       {/* Outer magnetic trailing ring */}
       <div
-        className={`fixed rounded-full pointer-events-none -translate-x-1/2 -translate-y-1/2 border transition-[width,height,background-color,border-color] duration-200 ease-out ${
-          isHovered
-            ? 'w-12 h-12 border-[#4a9eff] bg-[#4a9eff]/10 backdrop-blur-[1px]'
-            : isClicked
-            ? 'w-6 h-6 border-[#4a9eff]/80 bg-transparent'
-            : 'w-8 h-8 border-[#f5f5f5]/30 bg-transparent'
-        }`}
-        style={{
-          left: `${trailingPos.x}px`,
-          top: `${trailingPos.y}px`,
-          opacity: isVisible ? 1 : 0,
-        }}
+        ref={ringRef}
+        className="fixed top-0 left-0 w-8 h-8 -ml-4 -mt-4 rounded-full pointer-events-none border border-[#f5f5f5]/30 bg-transparent opacity-0 transition-[width,height,background-color,border-color] duration-200 ease-out will-change-transform"
       />
     </div>
   );

@@ -119,7 +119,7 @@ export default function Lab() {
     <section
       ref={sectionRef}
       id="lab"
-      className="relative py-28 md:py-44 border-t border-[#1a1a1a]"
+      className="relative py-28 md:py-44 border-t border-white/[0.08]"
     >
       <div className="max-w-[1400px] mx-auto px-6 md:px-12">
         {/* Header */}
@@ -144,7 +144,7 @@ export default function Lab() {
           {siteConfig.experiments.map((exp, i) => (
             <div
               key={exp.title}
-              className="lab-card group relative p-7 rounded-xl border border-[#1a1a1a] bg-[#0a0a0d] hover:border-[#333] transition-all duration-400 flex flex-col justify-between"
+              className="lab-card group relative p-7 rounded-2xl border border-white/[0.08] bg-[#08090e]/75 backdrop-blur-md hover:border-white/[0.22] hover:bg-[#0b0d15]/85 transition-all duration-400 shadow-[0_4px_24px_rgba(0,0,0,0.3)] flex flex-col justify-between"
             >
               <div>
                 {/* Header row */}
@@ -156,7 +156,7 @@ export default function Lab() {
                   >
                     {exp.label}
                   </span>
-                  <div className="flex items-center gap-1.5 text-xs text-[#555] font-mono">
+                  <div className="flex items-center gap-1.5 text-xs text-[#666] font-mono">
                     <Terminal className="w-3.5 h-3.5" />
                     <span>EXP_0{i + 1}</span>
                   </div>
@@ -165,23 +165,23 @@ export default function Lab() {
                 {/* Animated visual snippet */}
                 <LabCardVisual index={i} />
 
-                <h3 className="font-[family-name:var(--font-space-grotesk)] text-xl font-bold text-[#f5f5f5] mb-3 group-hover:text-[#4a9eff] transition-colors duration-300">
+                <h3 className="font-[family-name:var(--font-space-grotesk)] text-xl font-bold text-[#fafafa] mb-3 group-hover:text-[#4a9eff] transition-colors duration-300">
                   {exp.title}
                 </h3>
 
-                <p className="text-[#888] text-sm leading-relaxed font-[family-name:var(--font-inter)] mb-6">
+                <p className="text-[#a1a1aa] text-sm leading-relaxed font-[family-name:var(--font-inter)] mb-6">
                   {exp.description}
                 </p>
               </div>
 
               {/* Status footer */}
-              <div className="pt-4 border-t border-[#141414] flex items-center justify-between text-[11px] font-mono text-[#555]">
+              <div className="pt-4 border-t border-white/[0.08] flex items-center justify-between text-[11px] font-mono text-[#666]">
                 <span>STATUS: UNPUBLISHED STUDY</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-[#4a9eff]/40" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[#4a9eff]/60" />
               </div>
 
               {/* Subtle hover gradient */}
-              <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#4a9eff]/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400 pointer-events-none" />
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#4a9eff]/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400 pointer-events-none" />
             </div>
           ))}
         </div>

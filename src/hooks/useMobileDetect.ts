@@ -19,7 +19,7 @@ export function useMobileDetect(): DeviceInfo {
       const dpr = window.devicePixelRatio || 1;
       setDevice({
         isMobile,
-        pixelRatio: Math.min(dpr, isMobile ? 1.5 : 2),
+        pixelRatio: Math.min(dpr, isMobile ? 1.25 : 1.5),
       });
     };
 

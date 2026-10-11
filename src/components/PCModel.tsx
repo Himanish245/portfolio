@@ -4,7 +4,6 @@ import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { globalScrollProgress } from '@/hooks/useScrollProgress';
-import { useMousePosition } from '@/hooks/useMousePosition';
 
 function smoothstep(min: number, max: number, value: number) {
   const x = Math.max(0, Math.min(1, (value - min) / (max - min)));
@@ -127,14 +126,13 @@ export default function PCModel({ isMobile }: PCModelProps) {
   const monitorRef = useRef<THREE.Group>(null);
   const keyboardRef = useRef<THREE.Group>(null);
 
-  const mouse = useMousePosition();
   const gpuTexture = useGPUTexture();
   const terminalTexture = useTerminalTexture();
   const smoothP = useRef(0);
 
-  useFrame((state) => {
+  useFrame((state, delta) => {
     const target = globalScrollProgress.target;
-    smoothP.current = THREE.MathUtils.lerp(smoothP.current, target, 0.1);
+    smoothP.current = THREE.MathUtils.damp(smoothP.current, target, 7, delta);
     const p = smoothP.current;
     const time = state.clock.getElapsedTime();
 
@@ -151,9 +149,9 @@ export default function PCModel({ isMobile }: PCModelProps) {
       : THREE.MathUtils.lerp(0.0, isMobile ? 0.0 : 1.45, t2);
 
     // Position Y: Stays cleanly below text before scroll (-0.85) -> Pops up (+0.25) -> Docks (-1.0)
-    const heroY = isMobile ? -1.1 : -0.85;
-    const popY = isMobile ? 0.1 : 0.25;
-    const dockY = isMobile ? -1.25 : -1.0;
+    const heroY = isMobile ? -1.15 : -0.85;
+    const popY = isMobile ? 0.08 : 0.25;
+    const dockY = isMobile ? -1.35 : -1.0;
 
     const baseY = p <= PEAK
       ? THREE.MathUtils.lerp(heroY, popY, t1)
@@ -169,10 +167,10 @@ export default function PCModel({ isMobile }: PCModelProps) {
 
     rootGroupRef.current.position.set(posX, posY, posZ);
 
-    // Scale
-    const baseScale = isMobile ? 0.62 : 0.88;
-    const peakScale = isMobile ? 0.88 : 1.2;
-    const dockScale = isMobile ? 0.42 : 0.55;
+    // Responsive Scale: compact unobtrusive dock on mobile
+    const baseScale = isMobile ? 0.58 : 0.88;
+    const peakScale = isMobile ? 0.82 : 1.2;
+    const dockScale = isMobile ? 0.35 : 0.52;
 
     const scale = p <= PEAK
       ? THREE.MathUtils.lerp(baseScale, peakScale, t1)
@@ -185,8 +183,8 @@ export default function PCModel({ isMobile }: PCModelProps) {
     const rotX = THREE.MathUtils.lerp(0.12, 0.15, p) + Math.sin(p * Math.PI) * 0.1;
 
     const mouseInfluence = isMobile ? 0 : 0.08 * (1 - p * 0.5);
-    rootGroupRef.current.rotation.y = rotY + mouse.x * mouseInfluence;
-    rootGroupRef.current.rotation.x = rotX + mouse.y * mouseInfluence;
+    rootGroupRef.current.rotation.y = rotY + state.pointer.x * mouseInfluence;
+    rootGroupRef.current.rotation.x = rotX - state.pointer.y * mouseInfluence;
 
     // ──────────────── 2. PART DISASSEMBLY ────────────────
     const explosion = p <= PEAK ? t1 : (1 - t2);
@@ -234,7 +232,7 @@ export default function PCModel({ isMobile }: PCModelProps) {
       {/* ────────────────── 1. PC TOWER CHASSIS ────────────────── */}
       <group ref={towerRef} position={[1.1, 0, 0]}>
         {/* Outer Obsidian Frame */}
-        <mesh position={[0, 0, 0]} castShadow receiveShadow>
+        <mesh position={[0, 0, 0]}>
           <boxGeometry args={[1.05, 1.95, 1.85]} />
           <meshPhysicalMaterial
             color="#080a10"
@@ -272,17 +270,18 @@ export default function PCModel({ isMobile }: PCModelProps) {
           <meshBasicMaterial color="#38bdf8" />
         </mesh>
 
-        {/* Ultra-Clear Tempered Glass Side Panel */}
+        {/* Ultra-Clear Tempered Glass Side Panel (High-Performance Glass) */}
         <mesh ref={glassPanelRef} position={[0.52, 0, 0]}>
           <boxGeometry args={[0.02, 1.88, 1.78]} />
           <meshPhysicalMaterial
-            color="#0f172a"
-            transmission={0.96}
-            opacity={0.3}
+            color="#080e1e"
+            opacity={0.2}
             transparent={true}
-            roughness={0.03}
-            metalness={0.1}
-            reflectivity={0.98}
+            roughness={0.04}
+            metalness={0.12}
+            clearcoat={1.0}
+            clearcoatRoughness={0.06}
+            reflectivity={0.95}
           />
         </mesh>
 
@@ -424,26 +423,20 @@ export default function PCModel({ isMobile }: PCModelProps) {
           {/* Dual Braided Liquid Coolant Tubes */}
           <mesh position={[-0.02, 0.38, 0.15]}>
             <cylinderGeometry args={[0.026, 0.026, 0.65, 12]} />
-            <meshPhysicalMaterial
+            <meshStandardMaterial
               color="#38bdf8"
               emissive="#0284c7"
-              emissiveIntensity={0.9}
-              roughness={0.1}
-              transmission={0.45}
-              transparent
-              opacity={0.88}
+              emissiveIntensity={1.2}
+              roughness={0.2}
             />
           </mesh>
           <mesh position={[-0.02, 0.38, -0.15]}>
             <cylinderGeometry args={[0.026, 0.026, 0.65, 12]} />
-            <meshPhysicalMaterial
+            <meshStandardMaterial
               color="#818cf8"
               emissive="#4338ca"
-              emissiveIntensity={0.9}
-              roughness={0.1}
-              transmission={0.45}
-              transparent
-              opacity={0.88}
+              emissiveIntensity={1.2}
+              roughness={0.2}
             />
           </mesh>
         </group>
@@ -508,7 +501,7 @@ export default function PCModel({ isMobile }: PCModelProps) {
       </group>
 
       {/* ────────────────── 4. DESK SURFACE ────────────────── */}
-      <mesh position={[0, -1.22, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+      <mesh position={[0, -1.22, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[7, 5]} />
         <meshStandardMaterial color="#040407" roughness={0.9} />
       </mesh>
