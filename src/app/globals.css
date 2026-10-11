@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@source "../components";
+@source "../../src";
 
 :root {
   --bg: #050505;
