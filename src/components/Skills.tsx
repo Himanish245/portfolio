@@ -5,7 +5,6 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import siteConfig from '@/config/siteConfig';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
-import { Activity } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -44,110 +43,90 @@ export default function Skills() {
     <section
       ref={sectionRef}
       id="skills"
-      className="relative py-32 md:py-48 border-t border-white/[0.08]"
+      className="relative py-28 md:py-44 border-t border-white/[0.08]"
     >
       <div className="max-w-[1400px] mx-auto px-6 md:px-12">
         {/* Section Header */}
-        <div className="mb-20 md:mb-28 flex flex-col md:flex-row md:items-end justify-between gap-8">
+        <div className="mb-16 md:mb-20 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
-            <div className="flex items-center gap-3 mb-4">
-              <span className="text-xs uppercase tracking-[0.3em] text-[#38bdf8] font-mono font-semibold">
-                03 // ARCHITECTURAL TOOLCHAINS
-              </span>
-              <span className="text-white/20">•</span>
-              <span className="text-xs text-[#71717a] font-mono">
-                COMMAND MATRIX
-              </span>
-            </div>
-
-            <h2 className="font-[family-name:var(--font-space-grotesk)] text-[clamp(2.8rem,6.5vw,6rem)] font-extrabold text-[#fafafa] leading-[0.92] tracking-tight">
+            <span className="text-xs uppercase tracking-[0.3em] text-[#4a9eff] font-[family-name:var(--font-space-grotesk)] block mb-3 font-semibold">
+              03 // Capabilities
+            </span>
+            <h2 className="font-[family-name:var(--font-space-grotesk)] text-[clamp(2.5rem,6vw,5.5rem)] font-bold text-[#f5f5f5] leading-[0.95]">
               Technologies &amp;
               <br />
-              <span className="text-[#71717a]">Toolchains</span>
+              <span className="text-[#888]">Toolchains</span>
             </h2>
           </div>
-          <p className="text-[#a1a1aa] text-base md:text-lg max-w-md font-[family-name:var(--font-inter)] leading-relaxed">
-            Verified working stacks deployed across distributed backend systems, AI neural pipelines, cybersecurity telemetry, and real-time WebGL engines.
+          <p className="text-[#888] text-sm md:text-base max-w-sm font-[family-name:var(--font-inter)] leading-relaxed">
+            Verified working stacks across engineering, AI architectures, cybersecurity operations, and creative computing.
           </p>
         </div>
 
-        {/* Category Filter Deck */}
-        <div className="flex flex-wrap items-center gap-3 mb-14">
+        {/* Category Filter Pills */}
+        <div className="flex flex-wrap gap-2.5 mb-12">
           <button
             onClick={() => setActiveCategory(null)}
-            className={`px-4 py-2 rounded-full text-xs font-mono tracking-widest uppercase transition-all duration-300 ${
+            className={`px-4 py-2 rounded-full text-xs font-mono tracking-wider transition-all duration-300 ${
               activeCategory === null
-                ? 'bg-[#38bdf8] text-[#050505] font-bold shadow-[0_2px_12px_rgba(56,189,248,0.3)]'
-                : 'bg-white/[0.03] text-[#71717a] border border-white/[0.08] hover:text-[#fafafa] hover:border-white/[0.2]'
+                ? 'bg-[#4a9eff] text-[#050505] font-semibold'
+                : 'bg-white/[0.03] text-[#888] border border-white/[0.08] hover:text-[#f5f5f5] hover:border-white/[0.2]'
             }`}
           >
-            ALL CAPABILITIES
+            SHOW ALL
           </button>
           {siteConfig.skills.map((category) => (
             <button
               key={category.name}
-              onClick={() =>
-                setActiveCategory(activeCategory === category.name ? null : category.name)
-              }
-              className={`px-4 py-2 rounded-full text-xs font-mono tracking-widest uppercase transition-all duration-300 ${
+              onClick={() => setActiveCategory(activeCategory === category.name ? null : category.name)}
+              className={`px-4 py-2 rounded-full text-xs font-mono tracking-wider transition-all duration-300 ${
                 activeCategory === category.name
-                  ? 'bg-[#38bdf8] text-[#050505] font-bold shadow-[0_2px_12px_rgba(56,189,248,0.3)]'
-                  : 'bg-white/[0.03] text-[#71717a] border border-white/[0.08] hover:text-[#fafafa] hover:border-white/[0.2]'
+                  ? 'bg-[#4a9eff] text-[#050505] font-semibold'
+                  : 'bg-white/[0.03] text-[#888] border border-white/[0.08] hover:text-[#f5f5f5] hover:border-white/[0.2]'
               }`}
             >
-              {category.name}
+              {category.name.toUpperCase()}
             </button>
           ))}
         </div>
 
-        {/* 4 Column Typographic Command Grid */}
+        {/* 4 Column Typographic Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {siteConfig.skills.map((category, idx) => {
-            const isHighlighted =
-              activeCategory === null || activeCategory === category.name;
+            const isHighlighted = activeCategory === null || activeCategory === category.name;
             return (
               <div
                 key={category.name}
-                className={`skill-card p-8 rounded-2xl border bg-[#07080e]/85 backdrop-blur-xl transition-all duration-500 shadow-[0_8px_32px_rgba(0,0,0,0.4)] ${
+                className={`skill-card p-8 rounded-2xl border bg-[#08090e]/75 backdrop-blur-md transition-all duration-400 shadow-[0_4px_24px_rgba(0,0,0,0.3)] ${
                   isHighlighted
-                    ? 'border-white/[0.08] hover:border-white/[0.25] hover:bg-[#0a0c16]/90 opacity-100 scale-100'
-                    : 'border-white/[0.04] opacity-30 scale-[0.98]'
+                    ? 'border-white/[0.08] hover:border-white/[0.22] hover:bg-[#0b0d15]/85 opacity-100'
+                    : 'border-white/[0.04] opacity-35'
                 }`}
               >
-                {/* Header telemetry */}
                 <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/[0.08]">
-                  <div className="flex items-center gap-2">
-                    <Activity className="w-3.5 h-3.5 text-[#38bdf8]" />
-                    <span className="text-[11px] font-mono text-[#71717a]">
-                      DECK_0{idx + 1}
-                    </span>
-                  </div>
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8]" />
+                  <span className="text-[11px] font-mono text-[#666]">
+                    0{idx + 1}
+                  </span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#4a9eff]" />
                 </div>
 
-                <h3 className="font-[family-name:var(--font-space-grotesk)] text-xl font-bold text-[#fafafa] mb-6 tracking-tight">
+                <h3 className="font-[family-name:var(--font-space-grotesk)] text-lg font-bold text-[#fafafa] mb-6 tracking-wide">
                   {category.name}
                 </h3>
 
-                <ul className="space-y-3.5 mb-8">
+                <ul className="space-y-3">
                   {category.skills.map((skill) => (
                     <li
                       key={skill}
                       className="group flex items-center justify-between text-[#a1a1aa] hover:text-[#fafafa] transition-colors duration-200 text-sm font-[family-name:var(--font-inter)]"
                     >
                       <span>{skill}</span>
-                      <span className="text-[10px] text-[#52525b] group-hover:text-[#38bdf8] transition-colors font-mono">
-                        {'//'} 100%
+                      <span className="text-[10px] text-[#555] group-hover:text-[#4a9eff] transition-colors font-mono">
+                        {'//'}
                       </span>
                     </li>
                   ))}
                 </ul>
-
-                {/* Subdeck footer */}
-                <div className="pt-4 border-t border-white/[0.06] flex items-center justify-between text-[10px] font-mono text-[#71717a]">
-                  <span>ENV: PRODUCTION</span>
-                  <span className="text-emerald-400">READY</span>
-                </div>
               </div>
             );
           })}
