@@ -40,12 +40,12 @@ function useTerminalTexture() {
 
     ctx.fillStyle = '#64748b';
     ctx.font = '16px monospace';
-    ctx.fillText('himanish@workstation: ~ /telemetry-companion', 100, 28);
+    ctx.fillText('himanish@foreground-companion: ~ /telemetry', 100, 28);
 
     // Main terminal output
     ctx.fillStyle = '#38bdf8';
     ctx.font = 'bold 24px monospace';
-    ctx.fillText('> HIMANISH CORE WORKSTATION // LIVE RUNTIME', 36, 92);
+    ctx.fillText('> HIMANISH 3D WORKSTATION // FOREGROUND DOCK', 36, 92);
 
     ctx.fillStyle = '#cbd5e1';
     ctx.font = '19px monospace';
@@ -53,7 +53,7 @@ function useTerminalTexture() {
     ctx.fillText('[SECURITY] Network Telemetry ............ [GUARDED]', 36, 172);
     ctx.fillText('[NEURAL]   Applied AI Pipeline .......... [ENGAGED]', 36, 210);
     ctx.fillText('[CREATIVE] 3D WebGL / Kinematics ........ [ACTIVE]', 36, 248);
-    ctx.fillText('[STATUS]   DODCKED AS REAL-TIME COMPANION [STABLE]', 36, 286);
+    ctx.fillText('[STATUS]   POPPED OUT & DOCKED IN FOREGROUND', 36, 286);
 
     // Diagnostic bar
     ctx.fillStyle = '#1e293b';
@@ -63,11 +63,11 @@ function useTerminalTexture() {
 
     ctx.fillStyle = '#94a3b8';
     ctx.font = '16px monospace';
-    ctx.fillText('LIQUID COOLANT: 21.4°C • GPU CLOCK: 2650 MHz • FLOW: OPTIMAL', 36, 395);
+    ctx.fillText('COOLANT LOOP: 21.2°C • RTX CLOCK: 2700 MHz • KINEMATICS: 120 FPS', 36, 395);
 
     ctx.fillStyle = '#22c55e';
     ctx.font = 'bold 22px monospace';
-    ctx.fillText('COMPANION SETTLED • READY FOR NAVIGATION _', 36, 445);
+    ctx.fillText('FOREGROUND COMPANION ACTIVE • ENJOY BROWSING _', 36, 445);
 
     const texture = new THREE.CanvasTexture(canvas);
     texture.needsUpdate = true;
@@ -96,12 +96,12 @@ export default function PCModel({ isMobile }: PCModelProps) {
   const smoothPop = useRef(0);
   const smoothSettle = useRef(0);
 
-  useFrame((state, delta) => {
+  useFrame((state) => {
     const popTarget = globalScrollProgress.popProgress;
     const settleTarget = globalScrollProgress.settleProgress;
 
     // Smooth responsive interpolation
-    smoothPop.current = THREE.MathUtils.lerp(smoothPop.current, popTarget, 0.1);
+    smoothPop.current = THREE.MathUtils.lerp(smoothPop.current, popTarget, 0.12);
     smoothSettle.current = THREE.MathUtils.lerp(smoothSettle.current, settleTarget, 0.08);
 
     const pop = smoothPop.current;
@@ -110,31 +110,34 @@ export default function PCModel({ isMobile }: PCModelProps) {
 
     if (!rootGroupRef.current) return;
 
-    // ──────────────── 1. POP OUT PHASE -> SETTLE DOWN KINEMATICS ────────────────
-    // Position X: Starts at right (0.45), moves center during pop-out (0.0), then SETTLES to bottom-right (1.4)
+    // ──────────────── 1. DRAMATIC POP-OUT & SETTLE KINEMATICS ────────────────
+    // Position X:
+    // Starts at right in Hero (0.45) -> Swoops center during pop-out (0.0) -> SETTLES to bottom-right (1.48)
     const heroX = 0.45;
     const popX = 0.0;
-    const settleX = isMobile ? 0.0 : 1.45;
+    const settleX = isMobile ? 0.0 : 1.48;
     const currentX = settle > 0.01
       ? THREE.MathUtils.lerp(popX, settleX, settle)
       : THREE.MathUtils.lerp(heroX, popX, pop);
 
-    // Position Y: Starts at -0.15, rises up during pop-out (+0.25), then SETTLES down low (-1.05)
+    // Position Y:
+    // Starts at -0.15 -> Surges UP during pop-out (+0.35) -> SETTLES down low (-0.98)
     const heroY = -0.15;
-    const popY = 0.25;
-    const settleY = isMobile ? -1.3 : -1.02;
+    const popY = 0.35;
+    const settleY = isMobile ? -1.25 : -0.98;
     const baseY = settle > 0.01
       ? THREE.MathUtils.lerp(popY, settleY, settle)
       : THREE.MathUtils.lerp(heroY, popY, pop);
 
-    // Gentle floating idle breathing once settled
-    const idleFloat = settle > 0.5 ? Math.sin(time * 1.6) * 0.04 : 0;
+    // Gentle floating idle breathing when settled
+    const idleFloat = settle > 0.4 ? Math.sin(time * 1.8) * 0.04 : 0;
     const currentY = baseY + idleFloat;
 
-    // Position Z: Starts at 0, POPS OUT toward camera (+1.6), then SETTLES back into dock (-0.5)
+    // Position Z (Depth):
+    // Starts at 0 -> POPS OUT FORWARD toward the user (+2.2!) -> SETTLES into dock (-0.3)
     const heroZ = 0.0;
-    const popZ = 1.6;
-    const settleZ = -0.5;
+    const popZ = 2.2;
+    const settleZ = -0.3;
     const currentZ = settle > 0.01
       ? THREE.MathUtils.lerp(popZ, settleZ, settle)
       : THREE.MathUtils.lerp(heroZ, popZ, pop);
@@ -143,10 +146,11 @@ export default function PCModel({ isMobile }: PCModelProps) {
     rootGroupRef.current.position.y = THREE.MathUtils.lerp(rootGroupRef.current.position.y, currentY, 0.12);
     rootGroupRef.current.position.z = THREE.MathUtils.lerp(rootGroupRef.current.position.z, currentZ, 0.12);
 
-    // Scale: Starts at 1.0, pops up to 1.15, then SETTLES into compact companion size (0.55 / 0.4)
-    const heroScale = isMobile ? 0.72 : 1.05;
-    const popScale = isMobile ? 0.85 : 1.18;
-    const settleScale = isMobile ? 0.42 : 0.56;
+    // Scale:
+    // Starts at 1.05 -> POPS UP to 1.25 -> SETTLES down to 0.58 (desktop) / 0.42 (mobile)
+    const heroScale = isMobile ? 0.75 : 1.05;
+    const popScale = isMobile ? 0.95 : 1.25;
+    const settleScale = isMobile ? 0.42 : 0.58;
     const currentScale = settle > 0.01
       ? THREE.MathUtils.lerp(popScale, settleScale, settle)
       : THREE.MathUtils.lerp(heroScale, popScale, pop);
@@ -154,67 +158,67 @@ export default function PCModel({ isMobile }: PCModelProps) {
     rootGroupRef.current.scale.setScalar(currentScale);
 
     // ──────────────── 2. ROTATION & ORIENTATION ────────────────
-    // Spins 360° during pop-out, then settles into an aesthetic angled isometric showcase (0.5 rad)
-    const popRotY = -0.35 + pop * Math.PI * 1.8;
+    // Spins 360° during pop-out, then settles into a clean angled showcase perspective (0.55 rad)
+    const popRotY = -0.35 + pop * Math.PI * 2.0;
     const settleRotY = 0.55 + Math.sin(time * 0.8) * 0.03;
     const currentRotY = settle > 0.01
       ? THREE.MathUtils.lerp(popRotY, settleRotY, settle)
       : popRotY;
 
-    // Tilt angle
-    const popRotX = 0.12 + Math.sin(pop * Math.PI) * 0.22;
+    // Banking tilt angle
+    const popRotX = 0.12 + Math.sin(pop * Math.PI) * 0.25;
     const settleRotX = 0.15;
     const currentRotX = settle > 0.01
       ? THREE.MathUtils.lerp(popRotX, settleRotX, settle)
       : popRotX;
 
-    // Mouse parallax (subtle when settled)
-    const mouseInfluence = settle > 0.5 ? 0.06 : Math.max(1 - pop * 1.5, 0.05);
+    // Mouse parallax
+    const mouseInfluence = settle > 0.4 ? 0.06 : Math.max(1 - pop * 1.5, 0.05);
     const mouseRotY = isMobile ? 0 : mouse.x * 0.2 * mouseInfluence;
     const mouseRotX = isMobile ? 0 : mouse.y * 0.15 * mouseInfluence;
 
     rootGroupRef.current.rotation.y = THREE.MathUtils.lerp(rootGroupRef.current.rotation.y, currentRotY + mouseRotY, 0.1);
     rootGroupRef.current.rotation.x = THREE.MathUtils.lerp(rootGroupRef.current.rotation.x, currentRotX + mouseRotX, 0.1);
 
-    // ──────────────── 3. EXPLODED COMPONENT DISASSEMBLY ────────────────
-    // Explodes during pop-out (0 to 1), and gracefully pulls back into a clean semi-exploded settled silhouette
-    const explosionFactor = Math.max(pop - settle * 0.7, 0);
+    // ──────────────── 3. DRAMATIC EXPLODED PART DISASSEMBLY ────────────────
+    // Explodes vigorously during pop-out, then pulls into a compact semi-exploded dock
+    const explosionFactor = Math.max(pop - settle * 0.65, 0);
 
-    // Glass panel
+    // Tempered glass panel flies out wide
     if (glassPanelRef.current) {
-      const glassDist = explosionFactor * (isMobile ? 1.0 : 2.2);
+      const glassDist = explosionFactor * (isMobile ? 1.4 : 2.8);
       glassPanelRef.current.position.x = 0.52 + glassDist;
-      glassPanelRef.current.position.z = glassDist * 0.3;
+      glassPanelRef.current.position.z = glassDist * 0.35;
     }
 
-    // GPU separation
+    // GPU floats forward directly towards the screen
     if (gpuRef.current) {
-      const gpuDist = explosionFactor * (isMobile ? 0.9 : 1.8);
-      gpuRef.current.position.z = gpuDist * 1.1;
-      gpuRef.current.position.y = -0.22 - gpuDist * 0.4;
-      gpuRef.current.position.x = -0.05 + gpuDist * 0.25;
-      gpuRef.current.rotation.z = explosionFactor * 0.25;
+      const gpuDist = explosionFactor * (isMobile ? 1.2 : 2.2);
+      gpuRef.current.position.z = gpuDist * 1.2;
+      gpuRef.current.position.y = -0.22 - gpuDist * 0.45;
+      gpuRef.current.position.x = -0.05 + gpuDist * 0.3;
+      gpuRef.current.rotation.z = explosionFactor * 0.3;
     }
 
-    // Liquid Cooler & tubes
+    // CPU waterblock and liquid cooling tubes elevate
     if (coolerRef.current) {
-      const coolerDist = explosionFactor * (isMobile ? 0.8 : 1.5);
-      coolerRef.current.position.z = coolerDist * 0.9;
-      coolerRef.current.position.y = 0.35 + coolerDist * 0.45;
+      const coolerDist = explosionFactor * (isMobile ? 1.0 : 1.9);
+      coolerRef.current.position.z = coolerDist * 1.0;
+      coolerRef.current.position.y = 0.35 + coolerDist * 0.55;
     }
 
-    // RAM modules
+    // RAM sticks shoot up
     if (ramRef.current) {
-      const ramDist = explosionFactor * (isMobile ? 0.7 : 1.3);
-      ramRef.current.position.y = 0.45 + ramDist * 0.8;
-      ramRef.current.position.z = ramDist * 0.4;
+      const ramDist = explosionFactor * (isMobile ? 0.9 : 1.7);
+      ramRef.current.position.y = 0.45 + ramDist * 1.0;
+      ramRef.current.position.z = ramDist * 0.45;
     }
 
-    // Monitor
+    // Monitor separates for layered depth
     if (monitorRef.current) {
-      const monitorDist = explosionFactor * 0.6;
+      const monitorDist = explosionFactor * 0.8;
       monitorRef.current.position.z = -0.3 - monitorDist;
-      monitorRef.current.position.x = -0.8 - monitorDist * 0.5;
+      monitorRef.current.position.x = -0.8 - monitorDist * 0.6;
     }
   });
 
@@ -262,11 +266,11 @@ export default function PCModel({ isMobile }: PCModelProps) {
           <meshPhysicalMaterial
             color="#141c2c"
             transmission={0.85}
-            opacity={0.5}
+            opacity={0.55}
             transparent={true}
             roughness={0.05}
             metalness={0.2}
-            reflectivity={0.9}
+            reflectivity={0.95}
           />
         </mesh>
 
@@ -318,7 +322,7 @@ export default function PCModel({ isMobile }: PCModelProps) {
             <meshPhysicalMaterial
               color="#38bdf8"
               emissive="#0284c7"
-              emissiveIntensity={0.8}
+              emissiveIntensity={0.85}
               roughness={0.1}
               transmission={0.4}
               transparent
@@ -330,7 +334,7 @@ export default function PCModel({ isMobile }: PCModelProps) {
             <meshPhysicalMaterial
               color="#4a9eff"
               emissive="#1e40af"
-              emissiveIntensity={0.8}
+              emissiveIntensity={0.85}
               roughness={0.1}
               transmission={0.4}
               transparent
@@ -390,7 +394,7 @@ export default function PCModel({ isMobile }: PCModelProps) {
           <boxGeometry args={[1.14, 0.02, 0.39]} />
           <meshStandardMaterial color="#181c28" roughness={0.6} />
         </mesh>
-        <mesh position={[0, 0, 0.23]}>
+        <mesh position={[0, 0.23, 0.02]}>
           <boxGeometry args={[1.2, 0.015, 0.01]} />
           <meshBasicMaterial color="#38bdf8" />
         </mesh>
