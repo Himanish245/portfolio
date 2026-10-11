@@ -9,7 +9,7 @@ const HeroScene = dynamic(() => import('./HeroScene'), {
 
 export default function GlobalCanvas() {
   return (
-    <div className="fixed inset-0 pointer-events-none z-30">
+    <div className="fixed inset-0 pointer-events-none z-10">
       <HeroScene />
     </div>
   );

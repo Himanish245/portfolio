@@ -51,30 +51,29 @@ export default function Hero() {
       id="hero"
       className="relative min-h-screen w-full flex items-center justify-center overflow-hidden pt-20 md:pt-0"
     >
-      {/* Background depth mask */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#050505]/95 via-[#050505]/50 to-transparent pointer-events-none md:w-3/5" />
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#050505]/80 pointer-events-none" />
+      {/* Clean subtle ambient glow (no heavy black masking) */}
+      <div className="absolute inset-0 bg-radial from-transparent via-[#050505]/20 to-[#050505]/70 pointer-events-none" />
 
-      {/* Hero Editorial Text */}
-      <div className="relative z-10 max-w-[1400px] mx-auto px-6 md:px-12 w-full">
+      {/* Hero Editorial Text (z-20 ensures text is ALWAYS cleanly in front of 3D) */}
+      <div className="relative z-20 max-w-[1400px] mx-auto px-6 md:px-12 w-full pointer-events-auto">
         <div className="max-w-2xl">
           <h1
             ref={headingRef}
-            className="font-[family-name:var(--font-space-grotesk)] text-[clamp(3rem,9.5vw,9.5rem)] font-bold leading-[0.9] tracking-tight text-[#f5f5f5] mb-6"
+            className="font-[family-name:var(--font-space-grotesk)] text-[clamp(3rem,9.5vw,9.5rem)] font-bold leading-[0.9] tracking-tight text-[#f5f5f5] mb-6 drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)]"
           >
             {siteConfig.name}
           </h1>
 
           <p
             ref={subtitleRef}
-            className="font-[family-name:var(--font-space-grotesk)] text-[clamp(1.1rem,2.4vw,1.75rem)] font-light text-[#f5f5f5]/90 mb-4 leading-snug"
+            className="font-[family-name:var(--font-space-grotesk)] text-[clamp(1.1rem,2.4vw,1.75rem)] font-light text-[#f5f5f5]/90 mb-4 leading-snug drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]"
           >
             {siteConfig.tagline}
           </p>
 
           <p
             ref={descRef}
-            className="font-[family-name:var(--font-inter)] text-base md:text-lg text-[#888] max-w-xl mb-10 leading-relaxed"
+            className="font-[family-name:var(--font-inter)] text-base md:text-lg text-[#aaa] max-w-xl mb-10 leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]"
           >
             {siteConfig.subtitle}
           </p>
@@ -88,7 +87,7 @@ export default function Hero() {
             </a>
             <a
               href="#contact"
-              className="inline-flex items-center px-7 py-3.5 border border-[#f5f5f5]/20 text-[#f5f5f5] font-[family-name:var(--font-space-grotesk)] text-sm font-medium tracking-wide rounded-full hover:border-[#4a9eff] hover:text-[#4a9eff] transition-all duration-300"
+              className="inline-flex items-center px-7 py-3.5 border border-[#f5f5f5]/30 bg-[#050505]/40 backdrop-blur-sm text-[#f5f5f5] font-[family-name:var(--font-space-grotesk)] text-sm font-medium tracking-wide rounded-full hover:border-[#4a9eff] hover:text-[#4a9eff] transition-all duration-300"
             >
               Get in touch
             </a>

@@ -54,7 +54,7 @@ function useTerminalTexture() {
     ctx.fillText('[SECURITY] Network Telemetry ............ [GUARDED]', 36, 172);
     ctx.fillText('[NEURAL]   Applied AI Pipeline .......... [ENGAGED]', 36, 210);
     ctx.fillText('[CREATIVE] 3D WebGL / Kinematics ........ [ACTIVE]', 36, 248);
-    ctx.fillText('[STATUS]   CONSISTENT TRAJECTORY DOCK ... [SYNCHRONIZED]', 36, 286);
+    ctx.fillText('[STATUS]   DODCKED BELOW TEXT IN HERO ... [OPTIMAL]', 36, 286);
 
     ctx.fillStyle = '#1e293b';
     ctx.fillRect(36, 330, 952, 24);
@@ -95,7 +95,6 @@ export default function PCModel({ isMobile }: PCModelProps) {
 
   useFrame((state) => {
     const target = globalScrollProgress.target;
-    // Single smooth, consistent lerp tracker
     smoothP.current = THREE.MathUtils.lerp(smoothP.current, target, 0.1);
     const p = smoothP.current;
     const time = state.clock.getElapsedTime();
@@ -103,42 +102,53 @@ export default function PCModel({ isMobile }: PCModelProps) {
     if (!rootGroupRef.current) return;
 
     // ──────────────── 1. UNIFIED, CONSISTENT TRAJECTORY ────────────────
-    const PEAK = 0.38; // exact inflection point where it peaks out forward
+    const PEAK = 0.38; // point of maximum forward pop-out & explosion
     const t1 = smoothstep(0, PEAK, p);
     const t2 = smoothstep(PEAK, 1.0, p);
 
-    // Position X: 0.5 (hero right) -> 0.0 (center pop) -> 1.45 (docked bottom-right)
+    // Position X:
+    // Before scroll: parked on right (0.65) -> Center during pop-out (0.0) -> Settled in dock (1.45)
     const posX = p <= PEAK
-      ? THREE.MathUtils.lerp(0.5, 0.0, t1)
+      ? THREE.MathUtils.lerp(0.65, 0.0, t1)
       : THREE.MathUtils.lerp(0.0, isMobile ? 0.0 : 1.45, t2);
 
-    // Position Y: -0.15 (hero) -> +0.35 (pop peak) -> -1.0 (docked low)
-    const baseY = p <= PEAK
-      ? THREE.MathUtils.lerp(-0.15, 0.35, t1)
-      : THREE.MathUtils.lerp(0.35, isMobile ? -1.25 : -1.0, t2);
+    // Position Y:
+    // Before scroll: STAYS BELOW THE TEXT (-0.85)!
+    // During pop-out: surges UP to center (+0.25)
+    // Settle down: glides to bottom dock (-1.0)
+    const heroY = isMobile ? -1.1 : -0.85;
+    const popY = isMobile ? 0.1 : 0.25;
+    const dockY = isMobile ? -1.25 : -1.0;
 
-    // Smooth idle breathing float when settled, zero when at top
+    const baseY = p <= PEAK
+      ? THREE.MathUtils.lerp(heroY, popY, t1)
+      : THREE.MathUtils.lerp(popY, dockY, t2);
+
+    // Subtle breathing float when settled
     const idleFloat = Math.sin(time * 1.8) * 0.035 * t2;
     const posY = baseY + idleFloat;
 
-    // Position Z: 0.0 (hero) -> +2.0 (surges forward towards user) -> -0.4 (settled back)
+    // Position Z:
+    // Before scroll: 0.0 -> Pop-out surges forward (+2.0) -> Settle moves back (-0.4)
     const posZ = p <= PEAK
       ? THREE.MathUtils.lerp(0.0, 2.0, t1)
       : THREE.MathUtils.lerp(2.0, -0.4, t2);
 
     rootGroupRef.current.position.set(posX, posY, posZ);
 
-    // Scale: 1.05 (hero) -> 1.22 (expanded) -> 0.55 (settled compact dock)
-    const baseScale = isMobile ? 0.75 : 1.05;
-    const peakScale = isMobile ? 0.92 : 1.22;
+    // Scale:
+    // Before scroll: compact (0.85) so it stays cleanly below text -> Pops up (1.2) -> Docks (0.55)
+    const heroScale = isMobile ? 0.62 : 0.88;
+    const peakScale = isMobile ? 0.88 : 1.2;
     const dockScale = isMobile ? 0.42 : 0.55;
+
     const scale = p <= PEAK
-      ? THREE.MathUtils.lerp(baseScale, peakScale, t1)
+      ? THREE.MathUtils.lerp(heroScale, peakScale, t1)
       : THREE.MathUtils.lerp(peakScale, dockScale, t2);
 
     rootGroupRef.current.scale.setScalar(scale);
 
-    // Rotation Y: STRICTLY MONOTONIC TURN FROM -0.35 TO 1.85 (Zero reversals!)
+    // Rotation Y: Strictly monotonic forward turn from -0.35 to 1.85 (Zero reversals!)
     const rotY = THREE.MathUtils.lerp(-0.35, 1.85, p);
     const rotX = THREE.MathUtils.lerp(0.12, 0.15, p) + Math.sin(p * Math.PI) * 0.1;
 
@@ -147,7 +157,7 @@ export default function PCModel({ isMobile }: PCModelProps) {
     rootGroupRef.current.rotation.y = rotY + mouse.x * mouseInfluence;
     rootGroupRef.current.rotation.x = rotX + mouse.y * mouseInfluence;
 
-    // ──────────────── 2. CONSISTENT PART DISASSEMBLY ────────────────
+    // ──────────────── 2. PART DISASSEMBLY ────────────────
     // Explosion factor: 0.0 at top -> 1.0 at pop peak -> 0.0 at dock
     const explosion = p <= PEAK ? t1 : (1 - t2);
 
